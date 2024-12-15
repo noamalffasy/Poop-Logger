@@ -22,7 +22,7 @@ export default function Home() {
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Upload JSON Lines File</CardTitle>
+            <CardTitle>Upload Poop Log</CardTitle>
           </CardHeader>
           <CardContent>
             <FileUploadArea />
