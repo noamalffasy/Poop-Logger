@@ -32,7 +32,7 @@ const WeekSelectionCalendar: React.FC<WeekSelectionCalendarProps> = ({
   };
 
   const isWeekDisabled = (date: Date) => {
-    const week = getWeekIdentifier(date);    
+    const week = getWeekIdentifier(date);
     return !weeks.includes(week);
   };
 
@@ -75,9 +75,9 @@ const WeekSelectionCalendar: React.FC<WeekSelectionCalendarProps> = ({
         day: cn(
           buttonVariants({ variant: "ghost" }),
           "relative p-0 rounded-md text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].outside)]:bg-accent/50 [&:has([aria-selected].range_end)]:rounded-r-md [&:has([aria-selected])]:rounded-md",
-          "h-8 w-8 mx-0.5"
+          "mx-0.5"
         ),
-        day_button: "font-normal aria-selected:opacity-100",
+        day_button: "font-normal aria-selected:opacity-100 h-8 w-8",
         range_start: "rounded-r-none",
         range_end: "rounded-l-none",
         selected:
