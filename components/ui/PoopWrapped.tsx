@@ -1,12 +1,6 @@
 import { motion } from "motion/react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -89,8 +83,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   return (
     <Card className="shadow-lg max-w-xs mx-auto">
       <CardHeader>
-        <CardTitle>Poop Wrapped</CardTitle>
-        <CardDescription>Slacking off huh?</CardDescription>
+        <CardTitle>A Year in Rearview</CardTitle>
       </CardHeader>
       <CardContent>
         <Carousel className="aspect-[9/16]">
@@ -104,7 +97,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
                   className="text-2xl tracking-tight opacity-75 absolute top-1/3"
                   initial={{ opacity: 0, y: "100%", visibility: "hidden" }}
                   whileInView={{
-                    opacity: [null, 1, 1, 0],
+                    opacity: [null, 0.75, 0.75, 0],
                     y: [null, 0, 0, "-100%"],
                     visibility: [null, "visible", "visible", "hidden"],
                   }}
