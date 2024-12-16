@@ -2,9 +2,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import FileUploadArea from "@/components/ui/FileUploadArea";
+import PeriodSelection from "@/components/ui/PeriodSelection";
+import PoopWrapped from "@/components/ui/PoopWrapped";
 import { ModeToggle } from "@/components/ui/theme-toggle";
 import TimePeriodChartCard from "@/components/ui/TimePeriodChartCard";
-import PeriodSelection from "@/components/ui/PeriodSelection";
 import { useAppSelector } from "@/store/hooks";
 
 export default function Home() {
@@ -32,10 +33,15 @@ export default function Home() {
         )}
 
         {data && (
-          <div className="flex flex-col md:flex-row w-full gap-8">
-            <TimePeriodChartCard />
-            <PeriodSelection />
-          </div>
+          <>
+            <div className="flex flex-col md:flex-row w-full gap-8">
+              <TimePeriodChartCard />
+              <PeriodSelection />
+            </div>
+            <div className="mt-8">
+              <PoopWrapped data={data} />
+            </div>
+          </>
         )}
       </div>
     </div>
