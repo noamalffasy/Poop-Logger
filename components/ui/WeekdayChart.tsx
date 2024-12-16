@@ -1,4 +1,11 @@
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import {
   ChartContainer,
@@ -12,43 +19,35 @@ interface WeekdayChartProps {
 }
 
 export default function WeekdayChart({ data }: WeekdayChartProps) {
-  const chartData = Object.entries(data).map(([name, value]) => ({
-    name,
+  const chartData = Object.entries(data).map(([day, value]) => ({
+    day,
     value,
   }));
+
+  console.log(chartData);
 
   return (
     <ChartContainer
       config={{
         entries: {
-          label: "Entries",
+          label: "Number of breaks",
           color: "hsl(var(--chart-1))",
         },
       }}
       className="w-full h-full"
     >
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData}>
+        <BarChart accessibilityLayer data={chartData}>
+          <CartesianGrid vertical={false} />
           <XAxis
-            dataKey="name"
-            tick={{ fill: "hsl(var(--foreground))" }}
-            axisLine={{ stroke: "hsl(var(--border))" }}
-            tickLine={{ stroke: "hsl(var(--border))" }}
+            dataKey="day"
+            tickLine={false}
+            tickMargin={10}
+            axisLine={false}
+            tickFormatter={(value) => value.slice(0, 3)}
           />
-          <YAxis
-            tick={{ fill: "hsl(var(--foreground))" }}
-            axisLine={{ stroke: "hsl(var(--border))" }}
-            tickLine={{ stroke: "hsl(var(--border))" }}
-          />
-          <ChartTooltip
-            content={<ChartTooltipContent />}
-            cursor={{ fill: "hsl(var(--accent))" }}
-          />
-          <Bar
-            dataKey="value"
-            fill="hsl(var(--primary))"
-            radius={[4, 4, 0, 0]}
-          />
+          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+          <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={4} />
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>
