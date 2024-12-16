@@ -17,13 +17,11 @@ import { View } from "@/store/dataSlice";
 interface TimePeriodChartProps {
   data: { key: string; value: number }[];
   view: View;
-  selectedDate: Date;
 }
 
 export default function TimePeriodChart({
   data,
   view,
-  selectedDate,
 }: TimePeriodChartProps) {
   const chartData = data;
 

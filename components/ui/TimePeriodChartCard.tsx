@@ -6,9 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TimePeriodChartWrapper from "@/components/ui/TimePeriodChartWrapper";
 import { formatData } from "@/lib/chartDataFormatter";
 import { startOfWeek } from "@/lib/date";
-import { Period, PeriodType, View } from "@/store/dataSlice";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { setSelectedView } from "@/store/dataSlice";
+import { Period, PeriodType, setSelectedView, View } from "@/store/dataSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 const getSelectedDate = (selectedPeriod: Period): Date => {
   switch (selectedPeriod.type) {
@@ -79,28 +78,24 @@ const TimePeriodChartCard: React.FC = () => {
               <TimePeriodChartWrapper
                 data={formattedData.daily}
                 view={View.Daily}
-                selectedDate={selectedDate}
               />
             </TabsContent>
             <TabsContent value={View.Weekly} className="h-full">
               <TimePeriodChartWrapper
                 data={formattedData.weekly}
                 view={View.Weekly}
-                selectedDate={selectedDate}
               />
             </TabsContent>
             <TabsContent value={View.Monthly} className="h-full">
               <TimePeriodChartWrapper
                 data={formattedData.monthly}
                 view={View.Monthly}
-                selectedDate={selectedDate}
               />
             </TabsContent>
             <TabsContent value={View.Yearly} className="h-full">
               <TimePeriodChartWrapper
                 data={formattedData.yearly}
                 view={View.Yearly}
-                selectedDate={selectedDate}
               />
             </TabsContent>
           </Tabs>

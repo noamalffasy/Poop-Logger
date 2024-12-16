@@ -5,7 +5,6 @@ import { Frown } from "lucide-react";
 interface TimePeriodChartWrapperProps {
   data: { key: string; value: number }[];
   view: View;
-  selectedDate: Date;
 }
 
 const getViewName = (view: View) => {
@@ -26,7 +25,6 @@ const getViewName = (view: View) => {
 const TimePeriodChartWrapper: React.FC<TimePeriodChartWrapperProps> = ({
   data,
   view,
-  selectedDate,
 }) => {
   const hasData = data.length > 0;
   const viewName = getViewName(view);
@@ -34,7 +32,7 @@ const TimePeriodChartWrapper: React.FC<TimePeriodChartWrapperProps> = ({
   return (
     <div className="h-full flex items-center justify-center">
       {hasData ? (
-        <TimePeriodChart data={data} view={view} selectedDate={selectedDate} />
+        <TimePeriodChart data={data} view={view} />
       ) : (
         <div className="text-center text-gray-500 dark:text-gray-400">
           <Frown className="mx-auto mb-4 h-12 w-12" />

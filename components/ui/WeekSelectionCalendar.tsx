@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DateRange, DayPicker, rangeIncludesDate } from "react-day-picker";
 import { buttonVariants } from "@/components/ui/button";
+import { endOfWeek, getWeekIdentifier, startOfWeek } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import { Period, View } from "@/store/dataSlice";
-import { getWeekIdentifier, startOfWeek, endOfWeek } from "@/lib/date";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { DateRange, DayPicker, rangeIncludesDate } from "react-day-picker";
 
 interface WeekSelectionCalendarProps {
   periods: Period[];
@@ -23,20 +23,22 @@ const WeekSelectionCalendar: React.FC<WeekSelectionCalendarProps> = ({
   });
 
   useEffect(() => {
-    const from = selectedPeriodRange.from ?? new Date();
-    const to = selectedPeriodRange.to ?? new Date();
+    setSelectedPeriodRange((old) => {
+      const from = old.from ?? new Date();
+      const to = old.to ?? new Date();
 
-    if (view === View.Weekly) {
-      setSelectedPeriodRange({
-        from: startOfWeek(from),
-        to: endOfWeek(to),
-      });
-    } else {
-      setSelectedPeriodRange({
-        from: from,
-        to: from,
-      });
-    }
+      if (view === View.Weekly) {
+        return {
+          from: startOfWeek(from),
+          to: endOfWeek(to),
+        };
+      }
+
+      return {
+        from,
+        to,
+      };
+    });
   }, [view]);
 
   const handlePeriodClick = (day: Date) => {
