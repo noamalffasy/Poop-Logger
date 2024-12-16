@@ -7,10 +7,11 @@ interface DataState {
     selectedWeek: string
 }
 
-export interface ProcessedData {
-    [week: string]: {
-        [weekday: string]: number;
-    };
+export interface ProcessedData extends Array<Entry> {}
+
+export interface Entry {
+    timestamp: number;
+    // Add other properties as needed
 }
 
 const initialState: DataState = {

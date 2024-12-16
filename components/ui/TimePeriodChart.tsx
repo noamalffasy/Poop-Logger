@@ -14,27 +14,25 @@ import {
 } from "@/components/ui/chart";
 import type { ProcessedData } from "@/store/dataSlice";
 
-interface WeekdayChartProps {
-  data: ProcessedData[string];
+interface TimePeriodChartProps {
+  data: { key: string; value: number }[];
   view: "yearly" | "monthly" | "weekly" | "daily";
+  selectedDate: Date;
 }
 
-export default function WeekdayChart({ data, view }: WeekdayChartProps) {
-  const chartData = Object.entries(data).map(([key, value]) => ({
-    key,
-    value,
-  }));
+export default function TimePeriodChart({ data, view, selectedDate }: TimePeriodChartProps) {
+  const chartData = data;
 
   const getTickFormatter = (value: string) => {
     switch (view) {
       case "yearly":
-        return value.slice(0, 4); // Year
+        return new Date(0, parseInt(value)).toLocaleString('default', { month: 'short' });
       case "monthly":
-        return value.slice(0, 7); // Year-Month
+        return value; // Day of the month
       case "weekly":
-        return value.slice(0, 3); // Year-Month-Day (start of week)
+        return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][parseInt(value)];
       case "daily":
-        return value.slice(0, 10); // Year-Month-Day
+        return `${value}:00`; // Hour of the day
       default:
         return value;
     }
@@ -44,7 +42,7 @@ export default function WeekdayChart({ data, view }: WeekdayChartProps) {
     <ChartContainer
       config={{
         entries: {
-          label: "Number of breaks",
+          label: "Number of entries",
           color: "hsl(var(--chart-1))",
         },
       }}

@@ -3,26 +3,36 @@ import { useMemo } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import WeekdayChart from "@/components/ui/WeekdayChart";
+import TimePeriodChartWrapper from "@/components/ui/TimePeriodChartWrapper";
 import { useAppSelector } from "@/store/hooks";
+import { formatData } from "@/lib/chartDataFormatter";
+import type { ProcessedData } from "@/store/dataSlice";
 
-const WeekdayChartCard: React.FC = () => {
+const TimePeriodChartCard: React.FC = () => {
   const data = useAppSelector((state) => state.data.data);
   const selectedWeek = useAppSelector((state) => state.data.selectedWeek);
+  const selectedDate = new Date(); // Replace with actual selected date from WeekSelectionCalendar
 
-  const weeklyData = useMemo(() => {
-    if (data && data[selectedWeek]) {
-      return data[selectedWeek];
+  const formattedData = useMemo(() => {
+    if (data) {
+      return {
+        daily: formatData(data, "daily", selectedDate),
+        weekly: formatData(data, "weekly", selectedDate),
+        monthly: formatData(data, "monthly", selectedDate),
+        yearly: formatData(data, "yearly", selectedDate),
+      };
     }
-    return {};
-  }, [data, selectedWeek]);
+    return {
+      daily: [],
+      weekly: [],
+      monthly: [],
+      yearly: [],
+    };
+  }, [data, selectedDate]);
 
   const hasData = useMemo(() => {
-    if (weeklyData) {
-      return Object.keys(weeklyData).some((key) => weeklyData[key] > 0);
-    }
-    return false;
-  }, [weeklyData]);
+    return Object.values(formattedData).some((viewData) => viewData.length > 0);
+  }, [formattedData]);
 
   return (
     <Card className="shadow-lg w-full">
@@ -39,16 +49,16 @@ const WeekdayChartCard: React.FC = () => {
               <TabsTrigger value="yearly">Yearly</TabsTrigger>
             </TabsList>
             <TabsContent value="daily" className="h-full">
-              <WeekdayChart data={weeklyData!} view="daily" />
+              <TimePeriodChartWrapper data={formattedData.daily} view="daily" selectedDate={selectedDate} />
             </TabsContent>
             <TabsContent value="weekly" className="h-full">
-              <WeekdayChart data={weeklyData!} view="weekly" />
+              <TimePeriodChartWrapper data={formattedData.weekly} view="weekly" selectedDate={selectedDate} />
             </TabsContent>
             <TabsContent value="monthly" className="h-full">
-              <WeekdayChart data={weeklyData!} view="monthly" />
+              <TimePeriodChartWrapper data={formattedData.monthly} view="monthly" selectedDate={selectedDate} />
             </TabsContent>
             <TabsContent value="yearly" className="h-full">
-              <WeekdayChart data={weeklyData!} view="yearly" />
+              <TimePeriodChartWrapper data={formattedData.yearly} view="yearly" selectedDate={selectedDate} />
             </TabsContent>
           </Tabs>
         ) : (
@@ -62,4 +72,4 @@ const WeekdayChartCard: React.FC = () => {
   );
 };
 
-export default WeekdayChartCard;
+export default TimePeriodChartCard;
