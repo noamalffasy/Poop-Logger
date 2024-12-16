@@ -20,14 +20,16 @@ export default function Home() {
           Poop Logger
         </h1>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Upload Poop Log</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FileUploadArea />
-          </CardContent>
-        </Card>
+        {!data && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Upload Poop Log</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FileUploadArea />
+            </CardContent>
+          </Card>
+        )}
 
         {data && (
           <div className="flex flex-col md:flex-row w-full gap-8">
