@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import FileUploadArea from "@/components/ui/FileUploadArea";
 import { ModeToggle } from "@/components/ui/theme-toggle";
 import TimePeriodChartCard from "@/components/ui/TimePeriodChartCard";
-import WeekSelection from "@/components/ui/WeekSelection";
+import PeriodSelection from "@/components/ui/PeriodSelection";
 import { useAppSelector } from "@/store/hooks";
 
 export default function Home() {
@@ -32,7 +32,7 @@ export default function Home() {
         {data && (
           <div className="flex flex-col md:flex-row w-full gap-8">
             <TimePeriodChartCard />
-            <WeekSelection />
+            <PeriodSelection />
           </div>
         )}
       </div>

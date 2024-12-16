@@ -6,13 +6,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { DateRange, DayPicker, rangeIncludesDate } from "react-day-picker";
 
-interface WeekSelectionCalendarProps {
+interface PeriodSelectionCalendarProps {
   periods: Period[];
   onPeriodChange: (date: Date) => void;
   view: View;
 }
 
-const WeekSelectionCalendar: React.FC<WeekSelectionCalendarProps> = ({
+const PeriodSelectionCalendar: React.FC<PeriodSelectionCalendarProps> = ({
   periods,
   onPeriodChange,
   view,
@@ -136,4 +136,4 @@ const WeekSelectionCalendar: React.FC<WeekSelectionCalendarProps> = ({
   );
 };
 
-export default WeekSelectionCalendar;
+export default PeriodSelectionCalendar;

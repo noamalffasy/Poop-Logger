@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 
-import WeekSelectionCalendar from "@/components/ui/WeekSelectionCalendar";
+import PeriodSelectionCalendar from "@/components/ui/PeriodSelectionCalendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getWeekIdentifier } from "@/lib/date";
 import { handleDateChange } from "@/lib/handleDateChange";
@@ -36,7 +36,7 @@ const WeekSelection: React.FC = () => {
         <CardTitle>Period Selection</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col justify-center">
-        <WeekSelectionCalendar
+        <PeriodSelectionCalendar
           view={selectedView}
           periods={periods}
           onPeriodChange={handleDateChangeCallback}
