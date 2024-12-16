@@ -36,7 +36,7 @@ const WeekSelectionCalendar: React.FC<WeekSelectionCalendarProps> = ({
 
       return {
         from,
-        to,
+        to: from,
       };
     });
   }, [view]);
