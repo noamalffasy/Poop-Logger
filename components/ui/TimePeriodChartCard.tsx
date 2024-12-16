@@ -78,24 +78,28 @@ const TimePeriodChartCard: React.FC = () => {
               <TimePeriodChartWrapper
                 data={formattedData.daily}
                 view={View.Daily}
+                selectedDate={selectedDate}
               />
             </TabsContent>
             <TabsContent value={View.Weekly} className="h-full">
               <TimePeriodChartWrapper
                 data={formattedData.weekly}
                 view={View.Weekly}
+                selectedDate={selectedDate}
               />
             </TabsContent>
             <TabsContent value={View.Monthly} className="h-full">
               <TimePeriodChartWrapper
                 data={formattedData.monthly}
                 view={View.Monthly}
+                selectedDate={selectedDate}
               />
             </TabsContent>
             <TabsContent value={View.Yearly} className="h-full">
               <TimePeriodChartWrapper
                 data={formattedData.yearly}
                 view={View.Yearly}
+                selectedDate={selectedDate}
               />
             </TabsContent>
           </Tabs>

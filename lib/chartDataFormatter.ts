@@ -1,18 +1,18 @@
+import { endOfWeek, startOfWeek } from "@/lib/date";
 import { ProcessedData, View } from "@/store/dataSlice";
-import { endOfWeek, startOfWeek } from "./date";
 
-const getPossibleEntries = (view: View) => {
+export const getNumPossibleEntries = (view: View, selectedDate: Date) => {
     switch (view) {
         case View.Daily:
-            return Array.from({ length: 24 }, (_, i) => i); // Hours of the day
+            return 24;
         case View.Weekly:
-            return Array.from({ length: 7 }, (_, i) => i); // Days of the week
+            return 7;
         case View.Monthly:
-            return Array.from({ length: 31 }, (_, i) => i + 1); // Days of the month
+            return new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
         case View.Yearly:
-            return Array.from({ length: 12 }, (_, i) => i); // Months of the year
+            return 12;
         default:
-            return [];
+            return 0;
     }
 };
 
@@ -37,7 +37,7 @@ export const formatData = (data: ProcessedData, view: View, selectedDate: Date) 
             default:
                 return false;
         }
-    });    
+    });
 
     const aggregatedData = filteredData.reduce((acc, entry) => {
         const entryDate = new Date(entry.timestamp);
@@ -63,15 +63,25 @@ export const formatData = (data: ProcessedData, view: View, selectedDate: Date) 
         return acc;
     }, {} as { [key: string]: number });
 
-    const possibleEntries = getPossibleEntries(view);
-    possibleEntries.forEach(entry => {
-        if (!(entry in aggregatedData)) {
-            aggregatedData[entry] = 0;
-        }
-    });
-
     return Object.entries(aggregatedData).map(([key, value]) => ({
         key,
         value,
     }));
+};
+
+export const formatTick = (value: string, view: View) => {
+    switch (view) {
+        case View.Yearly:
+            return new Date(0, parseInt(value)).toLocaleString("default", {
+                month: "short",
+            });
+        case View.Monthly:
+            return `${parseInt(value) + 1}`; // Day of the month
+        case View.Weekly:
+            return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][parseInt(value)];
+        case View.Daily:
+            return `${value}:00`; // Hour of the day
+        default:
+            return value;
+    }
 };

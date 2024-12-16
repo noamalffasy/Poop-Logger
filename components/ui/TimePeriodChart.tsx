@@ -12,37 +12,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { View } from "@/store/dataSlice";
 
 interface TimePeriodChartProps {
   data: { key: string; value: number }[];
-  view: View;
 }
 
-export default function TimePeriodChart({
-  data,
-  view,
-}: TimePeriodChartProps) {
+export default function TimePeriodChart({ data }: TimePeriodChartProps) {
   const chartData = data;
-
-  const getTickFormatter = (value: string) => {
-    switch (view) {
-      case View.Yearly:
-        return new Date(0, parseInt(value)).toLocaleString("default", {
-          month: "short",
-        });
-      case View.Monthly:
-        return value; // Day of the month
-      case View.Weekly:
-        return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
-          parseInt(value)
-        ];
-      case View.Daily:
-        return `${value}:00`; // Hour of the day
-      default:
-        return value;
-    }
-  };
 
   return (
     <ChartContainer
@@ -64,7 +40,6 @@ export default function TimePeriodChart({
             tickLine={false}
             tickMargin={10}
             axisLine={false}
-            tickFormatter={getTickFormatter}
           />
           <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
           <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={4} />
