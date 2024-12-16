@@ -30,7 +30,7 @@ export default function Home() {
         </Card>
 
         {data && (
-          <div className="flex w-full gap-8">
+          <div className="flex flex-col md:flex-row w-full gap-8">
             <WeekdayChartCard />
             <WeekSelection />
           </div>

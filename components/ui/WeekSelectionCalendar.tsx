@@ -48,9 +48,9 @@ const WeekSelectionCalendar: React.FC<WeekSelectionCalendarProps> = ({
         disabled: isWeekDisabled,
       }}
       onDayClick={handleWeekClick}
-      className=""
+      className="flex justify-center"
       classNames={{
-        months: "relative flex flex-col",
+        months: "relative flex flex-col max-w-max",
         month: "space-y-4",
         month_caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium",
@@ -75,9 +75,8 @@ const WeekSelectionCalendar: React.FC<WeekSelectionCalendarProps> = ({
         day: cn(
           buttonVariants({ variant: "ghost" }),
           "relative p-0 rounded-md text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].outside)]:bg-accent/50 [&:has([aria-selected].range_end)]:rounded-r-md [&:has([aria-selected])]:rounded-md",
-          "mx-0.5"
         ),
-        day_button: "font-normal aria-selected:opacity-100 h-8 w-8",
+        day_button: "font-normal aria-selected:opacity-100 w-9 h-9",
         range_start: "rounded-r-none",
         range_end: "rounded-l-none",
         selected:
@@ -87,7 +86,7 @@ const WeekSelectionCalendar: React.FC<WeekSelectionCalendarProps> = ({
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
         disabled: "text-muted-foreground opacity-50",
         range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground rounded-none !w-9 !mx-0",
+          "aria-selected:bg-accent aria-selected:text-accent-foreground rounded-none !mx-0",
         hidden: "invisible",
       }}
       components={{
