@@ -1,53 +1,82 @@
-import React from "react";
-
+import React, { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DateRange, DayPicker, rangeIncludesDate } from "react-day-picker";
-
 import { buttonVariants } from "@/components/ui/button";
-import { endOfWeek, getWeekIdentifier, startOfWeek } from "@/lib/date";
 import { cn } from "@/lib/utils";
+import { Period, View } from "@/store/dataSlice";
+import { getWeekIdentifier, startOfWeek, endOfWeek } from "@/lib/date";
 
 interface WeekSelectionCalendarProps {
-  weeks: string[];
-  onWeekChange: (date: Date | undefined) => void;
+  periods: Period[];
+  onPeriodChange: (date: Date) => void;
+  view: View;
 }
 
 const WeekSelectionCalendar: React.FC<WeekSelectionCalendarProps> = ({
-  weeks,
-  onWeekChange,
+  periods,
+  onPeriodChange,
+  view,
 }) => {
-  const [selectedWeekRange, setSelectedWeekRange] = React.useState<DateRange>({
+  const [selectedPeriodRange, setSelectedPeriodRange] = useState<DateRange>({
     from: startOfWeek(new Date()),
     to: endOfWeek(new Date()),
   });
 
-  const handleWeekClick = (day: Date) => {
-    if (day) {
-      onWeekChange(startOfWeek(day));
-      setSelectedWeekRange({
+  useEffect(() => {
+    const from = selectedPeriodRange.from ?? new Date();
+    const to = selectedPeriodRange.to ?? new Date();
+
+    if (view === View.Weekly) {
+      setSelectedPeriodRange({
+        from: startOfWeek(from),
+        to: endOfWeek(to),
+      });
+    } else {
+      setSelectedPeriodRange({
+        from: from,
+        to: from,
+      });
+    }
+  }, [view]);
+
+  const handlePeriodClick = (day: Date) => {
+    if (view === View.Weekly) {
+      onPeriodChange(startOfWeek(day));
+      setSelectedPeriodRange({
         from: startOfWeek(day),
         to: endOfWeek(day),
+      });
+    } else {
+      onPeriodChange(day);
+      setSelectedPeriodRange({
+        from: day,
+        to: day,
       });
     }
   };
 
-  const isWeekDisabled = (date: Date) => {
-    const week = getWeekIdentifier(date);
-    return !weeks.includes(week);
-  };
+  const isPeriodDisabled = useCallback(
+    (date: Date) => {
+      const period = periods.find((p) => p.value === getWeekIdentifier(date));
+      return !period;
+    },
+    [periods]
+  );
 
   return (
     <DayPicker
+      required
       mode="single"
+      selected={selectedPeriodRange.from}
       modifiers={{
-        selected: selectedWeekRange,
-        range_start: selectedWeekRange.from,
-        range_end: selectedWeekRange.to,
+        selected: selectedPeriodRange,
+        range_start: selectedPeriodRange.from,
+        range_end: selectedPeriodRange.to,
         range_middle: (date: Date) =>
-          rangeIncludesDate(selectedWeekRange, date, true),
-        disabled: isWeekDisabled,
+          rangeIncludesDate(selectedPeriodRange, date, true),
+        disabled: isPeriodDisabled,
       }}
-      onDayClick={handleWeekClick}
+      onSelect={handlePeriodClick}
       className="flex justify-center"
       classNames={{
         months: "relative flex flex-col max-w-max",
@@ -74,11 +103,11 @@ const WeekSelectionCalendar: React.FC<WeekSelectionCalendarProps> = ({
         week: "flex w-full mt-2",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "relative p-0 rounded-md text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].outside)]:bg-accent/50 [&:has([aria-selected].range_end)]:rounded-r-md [&:has([aria-selected])]:rounded-md",
+          "relative p-0 rounded-md text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].outside)]:bg-accent/50 [&:has([aria-selected].range_end)]:rounded-r-md [&:has([aria-selected])]:rounded-md"
         ),
         day_button: "font-normal aria-selected:opacity-100 w-9 h-9",
-        range_start: "rounded-r-none",
-        range_end: "rounded-l-none",
+        range_start: cn(view === View.Weekly && "rounded-r-none"),
+        range_end: cn(view === View.Weekly && "rounded-l-none"),
         selected:
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
         today: "bg-accent text-accent-foreground",

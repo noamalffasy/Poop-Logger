@@ -26,5 +26,5 @@ export function endOfWeek(day: Date): Date {
 
 export function getWeekIdentifier(date: Date): string {
     const weekDate = startOfWeek(date);
-    return weekDate.toISOString().split('T')[0];
+    return weekDate.toDateString();
 };

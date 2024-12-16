@@ -1,29 +1,33 @@
-import { Frown } from "lucide-react";
 import TimePeriodChart from "@/components/ui/TimePeriodChart";
-import type { ProcessedData } from "@/store/dataSlice";
+import { View } from "@/store/dataSlice";
+import { Frown } from "lucide-react";
 
 interface TimePeriodChartWrapperProps {
   data: { key: string; value: number }[];
-  view: "yearly" | "monthly" | "weekly" | "daily";
+  view: View;
   selectedDate: Date;
 }
 
-const getViewName = (view: string) => {
+const getViewName = (view: View) => {
   switch (view) {
-    case "daily":
+    case View.Daily:
       return "day";
-    case "weekly":
+    case View.Weekly:
       return "week";
-    case "monthly":
+    case View.Monthly:
       return "month";
-    case "yearly":
+    case View.Yearly:
       return "year";
     default:
       return "view";
   }
 };
 
-const TimePeriodChartWrapper: React.FC<TimePeriodChartWrapperProps> = ({ data, view, selectedDate }) => {
+const TimePeriodChartWrapper: React.FC<TimePeriodChartWrapperProps> = ({
+  data,
+  view,
+  selectedDate,
+}) => {
   const hasData = data.length > 0;
   const viewName = getViewName(view);
 

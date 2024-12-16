@@ -11,7 +11,7 @@ export function parseJsonLines(content: string): ProcessedData {
             if (entry && entry.date) {
                 const parsedDate = parseCustomDate(entry.date);
                 if (!isNaN(parsedDate.getTime())) {
-                    data.push({ ...entry, timestamp: parsedDate.getTime() });
+                    data.push({ timestamp: parsedDate.getTime() });
                 } else {
                     console.error('Invalid date:', entry.date);
                 }

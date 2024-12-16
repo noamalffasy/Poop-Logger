@@ -12,26 +12,34 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import type { ProcessedData } from "@/store/dataSlice";
+import { View } from "@/store/dataSlice";
 
 interface TimePeriodChartProps {
   data: { key: string; value: number }[];
-  view: "yearly" | "monthly" | "weekly" | "daily";
+  view: View;
   selectedDate: Date;
 }
 
-export default function TimePeriodChart({ data, view, selectedDate }: TimePeriodChartProps) {
+export default function TimePeriodChart({
+  data,
+  view,
+  selectedDate,
+}: TimePeriodChartProps) {
   const chartData = data;
 
   const getTickFormatter = (value: string) => {
     switch (view) {
-      case "yearly":
-        return new Date(0, parseInt(value)).toLocaleString('default', { month: 'short' });
-      case "monthly":
+      case View.Yearly:
+        return new Date(0, parseInt(value)).toLocaleString("default", {
+          month: "short",
+        });
+      case View.Monthly:
         return value; // Day of the month
-      case "weekly":
-        return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][parseInt(value)];
-      case "daily":
+      case View.Weekly:
+        return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
+          parseInt(value)
+        ];
+      case View.Daily:
         return `${value}:00`; // Hour of the day
       default:
         return value;

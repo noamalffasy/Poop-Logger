@@ -5,9 +5,9 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useDispatch } from "react-redux";
 
-import { cn } from "@/lib/utils";
-import { setData, setSelectedWeek } from "@/store/dataSlice";
 import { parseJsonLines } from "@/lib/parseJsonLines";
+import { cn } from "@/lib/utils";
+import { setData } from "@/store/dataSlice";
 
 export default function FileUploadArea() {
   const [fileName, setFileName] = useState<string>("");
@@ -21,13 +21,6 @@ export default function FileUploadArea() {
         const content = e.target?.result as string;
         const parsedData = parseJsonLines(content);
         dispatch(setData(parsedData));
-
-        const weeks = Object.keys(parsedData);
-        const firstWeek = weeks[weeks.length - 1];
-
-        if (weeks.length > 0) {
-          dispatch(setSelectedWeek(firstWeek));
-        }
       };
       reader.readAsText(file);
     },

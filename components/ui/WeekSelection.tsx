@@ -3,37 +3,44 @@ import { useCallback, useMemo } from "react";
 import WeekSelectionCalendar from "@/components/ui/WeekSelectionCalendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getWeekIdentifier } from "@/lib/date";
-import { setSelectedWeek } from "@/store/dataSlice";
+import { handleDateChange } from "@/lib/handleDateChange";
+import { Period, PeriodType } from "@/store/dataSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 const WeekSelection: React.FC = () => {
   const dispatch = useAppDispatch();
   const data = useAppSelector((state) => state.data.data);
+  const selectedView = useAppSelector((state) => state.data.selectedView);
 
-  const weeks = useMemo(() => {
+  const periods = useMemo(() => {
     if (data) {
-      return Object.keys(data);
+      return data.map(
+        (key) =>
+          ({
+            type: PeriodType.Week,
+            value: getWeekIdentifier(new Date(key.timestamp)),
+          } as Period)
+      );
     }
     return [];
   }, [data]);
 
-  const handleWeekChange = useCallback(
-    (date: Date | undefined) => {
-      if (date && data) {
-        const week = getWeekIdentifier(date);
-        dispatch(setSelectedWeek(week));
-      }
-    },
-    [data, dispatch]
+  const handleDateChangeCallback = useCallback(
+    (date: Date) => handleDateChange(date, data, selectedView, dispatch),
+    [data, dispatch, selectedView]
   );
 
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle>Week Selection</CardTitle>
+        <CardTitle>Period Selection</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col justify-center">
-        <WeekSelectionCalendar weeks={weeks} onWeekChange={handleWeekChange} />
+        <WeekSelectionCalendar
+          view={selectedView}
+          periods={periods}
+          onPeriodChange={handleDateChangeCallback}
+        />
       </CardContent>
     </Card>
   );
