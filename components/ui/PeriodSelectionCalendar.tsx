@@ -1,10 +1,12 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { DateRange, DayPicker, rangeIncludesDate } from "react-day-picker";
+
 import { buttonVariants } from "@/components/ui/button";
 import { endOfWeek, getWeekIdentifier, startOfWeek } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import { Period, View } from "@/store/dataSlice";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
-import { DateRange, DayPicker, rangeIncludesDate } from "react-day-picker";
+import { MonthPicker } from "@/components/ui/month-picker";
 
 interface PeriodSelectionCalendarProps {
   periods: Period[];
@@ -21,41 +23,29 @@ const PeriodSelectionCalendar: React.FC<PeriodSelectionCalendarProps> = ({
     from: startOfWeek(new Date()),
     to: endOfWeek(new Date()),
   });
+  const [month, setMonth] = useState(() => {
+    const current = new Date();
+    return new Date(current.getFullYear(), current.getMonth(), 1);
+  });
 
-  useEffect(() => {
-    setSelectedPeriodRange((old) => {
-      const from = old.from ?? new Date();
-      const to = old.to ?? new Date();
-
+  const handlePeriodClick = useCallback(
+    (day: Date) => {
       if (view === View.Weekly) {
-        return {
-          from: startOfWeek(from),
-          to: endOfWeek(to),
-        };
+        onPeriodChange(startOfWeek(day));
+        setSelectedPeriodRange({
+          from: startOfWeek(day),
+          to: endOfWeek(day),
+        });
+      } else {
+        onPeriodChange(day);
+        setSelectedPeriodRange({
+          from: day,
+          to: day,
+        });
       }
-
-      return {
-        from,
-        to: from,
-      };
-    });
-  }, [view]);
-
-  const handlePeriodClick = (day: Date) => {
-    if (view === View.Weekly) {
-      onPeriodChange(startOfWeek(day));
-      setSelectedPeriodRange({
-        from: startOfWeek(day),
-        to: endOfWeek(day),
-      });
-    } else {
-      onPeriodChange(day);
-      setSelectedPeriodRange({
-        from: day,
-        to: day,
-      });
-    }
-  };
+    },
+    [onPeriodChange, view]
+  );
 
   const isPeriodDisabled = useCallback(
     (date: Date) => {
@@ -64,6 +54,87 @@ const PeriodSelectionCalendar: React.FC<PeriodSelectionCalendarProps> = ({
     },
     [periods]
   );
+
+  useEffect(() => {
+    setSelectedPeriodRange((old) => {
+      const from = old.from ?? new Date();
+      const to = old.to ?? new Date();
+
+      if (view === View.Daily) {
+        if (from.getDate() > to.getDate()) {
+          if (from.getMonth() === month.getMonth()) {
+            return {
+              from,
+              to: from,
+            };
+          }
+
+          const startOfMonth = new Date(
+            month.getFullYear(),
+            month.getMonth(),
+            1,
+            0,
+            0,
+            0,
+            0
+          );
+
+          return {
+            from: startOfMonth,
+            to: startOfMonth,
+          };
+        }
+
+        return {
+          from,
+          to: from,
+        };
+      } else if (view === View.Weekly) {
+        return {
+          from: startOfWeek(from),
+          to: endOfWeek(to),
+        };
+      } else if (view === View.Monthly) {
+        if (from.getMonth() !== month.getMonth()) {
+          return {
+            from: new Date(month.getFullYear(), month.getMonth(), 1),
+            to: new Date(month.getFullYear(), month.getMonth() + 1, 0),
+          };
+        }
+
+        return {
+          from,
+          to: from,
+        };
+      } else if (view === View.Yearly) {
+        if (from.getFullYear() !== month.getFullYear()) {
+          return {
+            from: new Date(month.getFullYear(), 0, 1),
+            to: new Date(month.getFullYear(), 11, 31),
+          };
+        }
+
+        return {
+          from,
+          to: from,
+        };
+      }
+
+      return {
+        from,
+        to: from,
+      };
+    });
+    if (view === View.Monthly) {
+      handlePeriodClick(month);
+    }
+  }, [view, month, handlePeriodClick]);
+
+  if (view === View.Monthly) {
+    return (
+      <MonthPicker className="w-[252px]" month={month} onMonthChange={setMonth} />
+    );
+  }
 
   return (
     <DayPicker
@@ -79,6 +150,8 @@ const PeriodSelectionCalendar: React.FC<PeriodSelectionCalendarProps> = ({
           rangeIncludesDate(selectedPeriodRange, date, true),
         disabled: isPeriodDisabled,
       }}
+      month={month}
+      onMonthChange={setMonth}
       onSelect={handlePeriodClick}
       className="flex justify-center"
       classNames={{
