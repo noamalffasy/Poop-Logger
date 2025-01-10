@@ -68,6 +68,7 @@ const PeriodSelectionCalendar: React.FC<PeriodSelectionCalendarProps> = ({
   return (
     <DayPicker
       required
+      showOutsideDays
       mode="single"
       selected={selectedPeriodRange.from}
       modifiers={{
@@ -108,10 +109,14 @@ const PeriodSelectionCalendar: React.FC<PeriodSelectionCalendarProps> = ({
           "relative p-0 rounded-md text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].outside)]:bg-accent/50 [&:has([aria-selected].range_end)]:rounded-r-md [&:has([aria-selected])]:rounded-md"
         ),
         day_button: "font-normal aria-selected:opacity-100 w-9 h-9",
-        range_start: cn(view === View.Weekly && "rounded-r-none"),
+        range_start: cn(
+          view === View.Weekly && "rounded-r-none",
+          "data-[outside]:bg-accent/70 data-[outside]:text-muted-foreground data-[outside]:opacity-70"
+        ),
         range_end: cn(view === View.Weekly && "rounded-l-none"),
-        selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+        selected: cn(
+          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground"
+        ),
         today: "bg-accent text-accent-foreground",
         outside:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
