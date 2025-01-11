@@ -132,7 +132,11 @@ const PeriodSelectionCalendar: React.FC<PeriodSelectionCalendarProps> = ({
 
   if (view === View.Monthly) {
     return (
-      <MonthPicker className="w-[252px]" month={month} onMonthChange={setMonth} />
+      <MonthPicker
+        className="w-[252px]"
+        date={month}
+        onMonthChange={setMonth}
+      />
     );
   }
 

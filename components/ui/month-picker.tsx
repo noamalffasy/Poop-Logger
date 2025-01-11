@@ -5,13 +5,13 @@ import { cn } from "@/lib/utils";
 
 interface MonthPickerProps {
   className?: string;
-  month: Date;
+  date: Date;
   onMonthChange: (date: Date) => void;
 }
 
 export function MonthPicker({
   className,
-  month,
+  date,
   onMonthChange,
 }: MonthPickerProps) {
   const months = [
@@ -29,17 +29,17 @@ export function MonthPicker({
     "Dec",
   ];
 
-  const currentYear = month.getFullYear();
-  const currentMonth = month.getMonth();
+  const currentYear = date.getFullYear();
+  const currentMonth = date.getMonth();
 
   const handleMonthChange = (monthIndex: number) => {
-    const newDate = new Date(month);
+    const newDate = new Date(date);
     newDate.setMonth(monthIndex);
     onMonthChange(newDate);
   };
 
   const handleYearChange = (delta: number) => {
-    const newDate = new Date(month);
+    const newDate = new Date(date);
     newDate.setFullYear(currentYear + delta);
     onMonthChange(newDate);
   };
