@@ -7,6 +7,7 @@ import { endOfWeek, getWeekIdentifier, startOfWeek } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import { Period, View } from "@/store/dataSlice";
 import { MonthPicker } from "@/components/ui/month-picker";
+import { YearPicker } from "@/components/ui/year-picker";
 
 interface PeriodSelectionCalendarProps {
   periods: Period[];
@@ -125,10 +126,16 @@ const PeriodSelectionCalendar: React.FC<PeriodSelectionCalendarProps> = ({
         to: from,
       };
     });
-    if (view === View.Monthly) {
+    if (view === View.Monthly || view === View.Yearly) {
       handlePeriodClick(month);
     }
   }, [view, month, handlePeriodClick]);
+
+  if (view === View.Yearly) {
+    return (
+      <YearPicker className="w-[252px]" date={month} onYearChange={setMonth} />
+    );
+  }
 
   if (view === View.Monthly) {
     return (
