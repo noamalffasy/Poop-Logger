@@ -15,7 +15,30 @@ interface PoopWrappedProps {
 }
 
 const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
-  const mostPoopsDate = data.reduce((acc, entry) => {
+  // Filter data to only include entries from the current year
+  const currentYear = new Date().getFullYear();
+  const currentYearData = data.filter((entry) => {
+    const entryYear = new Date(entry.timestamp).getFullYear();
+    return entryYear === currentYear;
+  });
+
+  // If there's no data for the current year, show a message
+  if (currentYearData.length === 0) {
+    return (
+      <Card className="shadow-lg max-w-xs mx-auto">
+        <CardHeader>
+          <CardTitle>A Year in Rearview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center text-muted-foreground">
+            No data available for {currentYear} yet. Start logging to see your stats!
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const mostPoopsDate = currentYearData.reduce((acc, entry) => {
     const date = new Date(entry.timestamp).toLocaleDateString();
     acc[date] = (acc[date] || 0) + 1;
     return acc;
@@ -25,7 +48,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     b[1] > a[1] ? b : a
   );
 
-  const mostPoopsMonth = data.reduce((acc, entry) => {
+  const mostPoopsMonth = currentYearData.reduce((acc, entry) => {
     const month = new Date(entry.timestamp).toLocaleString("default", {
       month: "long",
       year: "numeric",
@@ -38,7 +61,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     b[1] > a[1] ? b : a
   );
 
-  const totalPoops = data.length;
+  const totalPoops = currentYearData.length;
 
   const slides = [
     {
