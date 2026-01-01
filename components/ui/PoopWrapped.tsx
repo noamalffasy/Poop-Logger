@@ -218,7 +218,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         "Hope that's not during important meetings... 😬",
         "Your body said 'NOT TODAY' to productivity on this day.",
         "This day is OWNED by your digestive system.",
-        "Monday blues? Nah, you got [weekday] browns. 💀",
+        "Guess we found your favorite day of the week. 💀",
       ],
       percentile: [
         "You're in the HALL OF FAME. We're building a statue.",
