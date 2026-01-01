@@ -107,8 +107,9 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   );
 
   // Calculate average per day
+  const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
   const daysSinceYearStart = Math.ceil(
-    (Date.now() - new Date(currentYear, 0, 1).getTime()) / (1000 * 60 * 60 * 24)
+    (Date.now() - new Date(currentYear, 0, 1).getTime()) / MILLISECONDS_PER_DAY
   );
   const avgPerDay = (totalPoops / daysSinceYearStart).toFixed(1);
 
@@ -132,21 +133,27 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   const sortedData = [...currentYearData].sort((a, b) => a.timestamp - b.timestamp);
   let longestStreak = 1;
   let currentStreak = 1;
-  let lastDate = new Date(sortedData[0].timestamp);
-  lastDate.setHours(0, 0, 0, 0);
 
-  for (let i = 1; i < sortedData.length; i++) {
-    const currentDate = new Date(sortedData[i].timestamp);
-    currentDate.setHours(0, 0, 0, 0);
-    const dayDiff = Math.floor((currentDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (dayDiff === 1) {
-      currentStreak++;
-      longestStreak = Math.max(longestStreak, currentStreak);
-    } else if (dayDiff > 1) {
-      currentStreak = 1;
+  if (sortedData.length > 1) {
+    let lastDate = new Date(sortedData[0].timestamp);
+    lastDate.setHours(0, 0, 0, 0);
+
+    for (let i = 1; i < sortedData.length; i++) {
+      const currentDate = new Date(sortedData[i].timestamp);
+      currentDate.setHours(0, 0, 0, 0);
+      const dayDiff = Math.floor((currentDate.getTime() - lastDate.getTime()) / MILLISECONDS_PER_DAY);
+      
+      if (dayDiff === 0) {
+        // Same day, continue streak
+        continue;
+      } else if (dayDiff === 1) {
+        currentStreak++;
+        longestStreak = Math.max(longestStreak, currentStreak);
+      } else if (dayDiff > 1) {
+        currentStreak = 1;
+      }
+      lastDate = currentDate;
     }
-    lastDate = currentDate;
   }
 
   // Calculate weekday distribution
