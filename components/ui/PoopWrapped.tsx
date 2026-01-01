@@ -173,53 +173,60 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   const getSnarkyComment = (stat: string): string => {
     const comments: Record<string, string[]> = {
       total: [
-        "That's a lot of time on the throne! 👑",
-        "Your toilet is your best friend at this point.",
-        "Wouldn't want to enter the toilet olympics, would you?",
-        "That's commitment to digestive excellence!",
-        "Your toilet seat has seen some things this year.",
+        "Holy sh*t! That's a lot of bathroom breaks! 💩",
+        "Your toilet paper budget must be INSANE.",
+        "The throne has seen more of you than your couch this year.",
+        "Your toilet's gonna file for worker's comp at this rate.",
+        "That's enough to fertilize a small farm. Just saying. 🌾",
+        "Someone's fiber intake is OFF THE CHARTS!",
       ],
       mostDay: [
-        "Oof that must've been a rough day for your toilet.",
-        "Your toilet needed a break after that day!",
-        "Someone had too much fiber that day...",
-        "That day was legendary in bathroom history.",
-        "Your toilet is still recovering from this day.",
+        "RIP your toilet. It never stood a chance that day. 🪦",
+        "We should've sent flowers to your bathroom after that.",
+        "Your toilet called in sick the next day, I heard.",
+        "That day will go down in infamy. Never forget. 🫡",
+        "Hope you had a good book handy that day...",
+        "Your toilet's therapy bills must be astronomical.",
       ],
       mostMonth: [
-        "You were on a roll!",
-        "That month was explosive! 💥",
-        "Someone discovered a new coffee shop that month?",
-        "Your toilet saw some serious action that month!",
-        "What happened that month? We need answers!",
+        "That month was UNHINGED! What were you eating?! 😱",
+        "Did you lose a bet or something? Damn.",
+        "Your plumber is probably naming their yacht after you.",
+        "I'm calling Guinness World Records about this one.",
+        "That month was a CRIME SCENE. 🚨",
+        "Someone discovered Taco Bell that month, huh?",
       ],
       streak: [
-        "That's dedication to regularity! 🏆",
-        "Consistency is key, they say!",
-        "You're like a well-oiled machine!",
-        "Your digestive system has a schedule!",
-        "That's what we call routine!",
+        "You're basically a sh*tting MACHINE at this point. 🤖",
+        "Most people can't commit to ANYTHING like this!",
+        "Your consistency is honestly terrifying.",
+        "This is either impressive or concerning. We're not sure.",
+        "You could set your watch by this. Literally.",
+        "Your intestines run tighter than a Swiss watch. ⏰",
       ],
       hour: [
-        "Clockwork precision! ⏰",
-        "Your body has a schedule and it sticks to it!",
-        "Peak performance hours identified!",
-        "That's when the magic happens!",
-        "Your toilet knows to expect you then!",
+        "Your colon has better punctuality than most people.",
+        "This is clockwork at its FINEST. Or weirdest.",
+        "Hope your boss doesn't notice this pattern... 👀",
+        "Everyone knows not to book meetings during this time, right?",
+        "The prophecy has foretold this hour of reckoning.",
+        "Your body runs on a schedule even YOU can't change.",
       ],
       weekday: [
-        "That day just hits different! 📅",
-        "Your body knows what day it is!",
-        "Some days are just meant for the throne!",
-        "That's your special day apparently!",
-        "Your favorite day for a reason!",
+        "Clearly this is your toilet's favorite day too. 🚽",
+        "Your bowels have STRONG opinions about this day.",
+        "Hope that's not during important meetings... 😬",
+        "Your body said 'NOT TODAY' to productivity on this day.",
+        "This day is OWNED by your digestive system.",
+        "Monday blues? Nah, you got [weekday] browns. 💀",
       ],
       percentile: [
-        "You're basically a professional at this point!",
-        "Elite status achieved! 🌟",
-        "You're in rare company!",
-        "Not many can claim this achievement!",
-        "You've mastered the art!",
+        "You're in the HALL OF FAME. We're building a statue.",
+        "Elite doesn't even BEGIN to cover this. 👑",
+        "You've transcended normal human limits. Congrats?",
+        "This level of dedication is... unsettling honestly.",
+        "You're not just top tier. You're LEGENDARY status.",
+        "The 1% we didn't know existed. But here we are.",
       ],
     };
 
@@ -233,100 +240,95 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
 
   const slides = [
     {
-      pretext: "Welcome to your year in review",
+      pretext: "Brace yourself...",
       title: `${currentYear} Wrapped`,
       description: [
-        { text: "Let's dive into your ", type: "normal" },
-        { text: "bathroom journey", type: "bold" },
-        { text: " this year!", type: "normal" },
+        { text: "Your ", type: "normal" },
+        { text: "BATHROOM HISTORY", type: "bold" },
+        { text: " in all its glory", type: "normal" },
       ],
-      followup: "Buckle up, this is going to be interesting! 🚽",
+      followup: "This year's stats are absolutely WILD 💩",
       gradient: "bg-gradient-to-br from-purple-600 via-pink-600 to-red-600",
     },
     {
-      pretext: "This year you've been busy",
+      pretext: "Let's talk numbers...",
       title: "Total Poops",
       description: [
-        { text: "You logged ", type: "normal" },
+        { text: "A whopping ", type: "normal" },
         { text: totalPoops.toString(), type: "bold" },
-        { text: " poops in ", type: "normal" },
+        { text: " logs in ", type: "normal" },
         { text: currentYear.toString(), type: "bold" },
-        { text: "!", type: "normal" },
       ],
       followup: getSnarkyComment("total"),
       gradient: "bg-gradient-to-br from-blue-600 via-cyan-600 to-teal-600",
-      stats: `That's ${avgPerDay} per day on average`,
+      stats: `${avgPerDay} times per day (we're counting)`,
     },
     {
-      pretext: "You poop regularly. But one day stood out",
-      title: "Most Poops in a Day",
+      pretext: "This day will be remembered...",
+      title: "Your Record Day",
       description: [
-        { text: "You pooped the most times on ", type: "normal" },
         { text: mostPoopsDateEntry[0], type: "bold" },
-        { text: " with a total of ", type: "normal" },
-        { text: mostPoopsDateEntry[1], type: "bold" },
-        { text: " poops!", type: "normal" },
+        { text: " — ", type: "normal" },
+        { text: mostPoopsDateEntry[1].toString(), type: "bold" },
+        { text: " bathroom trips", type: "normal" },
       ],
       followup: getSnarkyComment("mostDay"),
       gradient: "bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600",
     },
     {
-      pretext: "You've been consistent. But one month was special",
-      title: "Most Active Month",
+      pretext: "One month to rule them all",
+      title: "Peak Month",
       description: [
-        { text: "Your most active month was ", type: "normal" },
         { text: mostPoopsMonthEntry[0], type: "bold" },
-        { text: " with ", type: "normal" },
-        { text: mostPoopsMonthEntry[1], type: "bold" },
-        { text: " poops!", type: "normal" },
+        { text: " was absolutely ", type: "normal" },
+        { text: "LEGENDARY", type: "bold" },
       ],
       followup: getSnarkyComment("mostMonth"),
       gradient: "bg-gradient-to-br from-green-500 via-emerald-600 to-teal-600",
+      stats: `${mostPoopsMonthEntry[1]} poops that month`,
     },
     {
-      pretext: "Your body runs like clockwork",
-      title: "Peak Performance Time",
+      pretext: "We've noticed a pattern...",
+      title: "The Daily Ritual",
       description: [
-        { text: "Your busiest hour was ", type: "normal" },
+        { text: "Every day at ", type: "normal" },
         { text: busiestHourFormatted, type: "bold" },
-        { text: " with ", type: "normal" },
-        { text: busiestHourCount.toString(), type: "bold" },
-        { text: " visits!", type: "normal" },
+        { text: " like clockwork", type: "normal" },
       ],
       followup: getSnarkyComment("hour"),
       gradient: "bg-gradient-to-br from-orange-500 via-red-600 to-pink-600",
+      stats: `${busiestHourCount} times at this exact hour`,
     },
     {
-      pretext: "Consistency is everything",
-      title: "Longest Streak",
+      pretext: "This is actually impressive",
+      title: `${longestStreak}-Day Streak`,
       description: [
-        { text: "You pooped ", type: "normal" },
-        { text: `${longestStreak} days`, type: "bold" },
-        { text: " in a row!", type: "normal" },
+        { text: longestStreak.toString(), type: "bold" },
+        { text: " consecutive days of ", type: "normal" },
+        { text: "PEAK PERFORMANCE", type: "bold" },
       ],
       followup: getSnarkyComment("streak"),
       gradient: "bg-gradient-to-br from-yellow-500 via-orange-600 to-red-600",
     },
     {
-      pretext: "Some days just hit different",
-      title: "Favorite Day",
+      pretext: "You have a favorite",
+      title: `${favoriteWeekdayEntry[0]}s Hit Different`,
       description: [
-        { text: "You prefer ", type: "normal" },
-        { text: favoriteWeekdayEntry[0], type: "bold" },
-        { text: " with ", type: "normal" },
-        { text: favoriteWeekdayEntry[1].toString(), type: "bold" },
-        { text: " visits!", type: "normal" },
+        { text: "Your body ", type: "normal" },
+        { text: "OWNS", type: "bold" },
+        { text: " this day", type: "normal" },
       ],
       followup: getSnarkyComment("weekday"),
       gradient: "bg-gradient-to-br from-pink-500 via-rose-600 to-red-600",
+      stats: `${favoriteWeekdayEntry[1]} visits on ${favoriteWeekdayEntry[0]}s`,
     },
     {
-      pretext: "You're special",
-      title: "Elite Status",
+      pretext: "The final verdict",
+      title: "Elite Tier Unlocked",
       description: [
-        { text: "You're in the top ", type: "normal" },
+        { text: "Top ", type: "normal" },
         { text: `${percentile}%`, type: "bold" },
-        { text: " of consistent poopers!", type: "normal" },
+        { text: " performer worldwide", type: "normal" },
       ],
       followup: getSnarkyComment("percentile"),
       gradient: "bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600",
@@ -338,102 +340,115 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       key={index}
       className={`relative flex flex-col items-center justify-center text-white ${slide.gradient} ${
         isFullScreen ? "min-h-screen" : "aspect-[9/16]"
-      }`}
+      } overflow-hidden`}
     >
+      {/* Pre-text with dramatic entrance and exit */}
       <motion.p
-        className={`${isFullScreen ? "text-4xl md:text-5xl" : "text-2xl"} tracking-tight opacity-75 absolute ${
-          isFullScreen ? "top-1/4" : "top-1/3"
+        className={`${isFullScreen ? "text-3xl md:text-5xl" : "text-xl"} font-semibold tracking-tight absolute ${
+          isFullScreen ? "top-1/4" : "top-1/4"
         }`}
-        initial={{ opacity: 0, y: "100%", visibility: "hidden" }}
+        initial={{ opacity: 0, scale: 0.5, y: 50, rotateX: -90 }}
         whileInView={{
-          opacity: [null, 0.75, 0.75, 0],
-          y: [null, 0, 0, "-100%"],
-          visibility: [null, "visible", "visible", "hidden"],
+          opacity: [0, 1, 1, 0],
+          scale: [0.5, 1.1, 1, 0.8],
+          y: [50, -10, 0, -100],
+          rotateX: [-90, 10, 0, 90],
         }}
         transition={{
-          ease: ["easeOut"],
-          duration: 4,
-          times: [0, 0.1, 0.8, 1],
-          delay: 0.5,
-          repeat: 0,
+          duration: 3.5,
+          times: [0, 0.15, 0.75, 1],
+          ease: [0.43, 0.13, 0.23, 0.96],
         }}
       >
         {slide.pretext}
       </motion.p>
-      <div className="text-center px-8 max-w-3xl">
+
+      <div className="text-center px-8 max-w-4xl">
+        {/* Title with bounce and scale effect */}
         <motion.h2
           className={`${
-            isFullScreen ? "text-4xl md:text-6xl" : "text-xl"
-          } tracking-tighter font-bold mb-4`}
-          initial={{ opacity: 0, y: "100%" }}
+            isFullScreen ? "text-5xl md:text-7xl" : "text-2xl"
+          } tracking-tighter font-black mb-6`}
+          initial={{ opacity: 0, scale: 0.3, rotateY: -180 }}
           whileInView={{
-            opacity: [null, 1],
-            y: [null, "0"],
+            opacity: [0, 1],
+            scale: [0.3, 1.2, 1],
+            rotateY: [-180, 10, 0],
           }}
           transition={{
-            ease: ["easeOut"],
-            duration: 0.3,
-            times: [0, 1],
-            delay: 4.5,
+            duration: 0.8,
+            times: [0, 0.6, 1],
+            ease: [0.68, -0.55, 0.265, 1.55], // Bounce easing
+            delay: 3.5,
           }}
         >
           {slide.title}
         </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: "100%" }}
-          whileInView={{
-            opacity: [null, 1],
-            y: [null, 0],
-          }}
-          transition={{
-            ease: ["easeOut"],
-            duration: 0.3,
-            times: [0, 1],
-            delay: 4.2,
-          }}
-          className={`${isFullScreen ? "text-3xl md:text-4xl" : "text-xl"} tracking-tight`}
+
+        {/* Description with staggered word animations */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ delay: 4, duration: 0.3 }}
+          className={`${isFullScreen ? "text-3xl md:text-5xl" : "text-lg"} tracking-tight font-medium leading-relaxed`}
         >
-          {slide.description.map((entry, i) =>
-            entry.type === "bold" ? (
-              <span className="font-bold" key={i}>
-                {entry.text}
-              </span>
-            ) : (
-              <span className="opacity-75" key={i}>
-                {entry.text}
-              </span>
-            )
-          )}
-        </motion.p>
+          {slide.description.map((entry, i) => (
+            <motion.span
+              key={i}
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                scale: entry.type === "bold" ? [0.8, 1.15, 1] : 1,
+              }}
+              transition={{
+                delay: 4 + i * 0.1,
+                duration: 0.5,
+                ease: "easeOut",
+              }}
+              className={entry.type === "bold" ? "font-black text-white" : "font-light opacity-90"}
+            >
+              {entry.text}
+            </motion.span>
+          ))}
+        </motion.div>
+
+        {/* Stats line with slide in from side */}
         {slide.stats && (
           <motion.p
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0, x: -100, rotateZ: -5 }}
             whileInView={{
-              opacity: [0, 0.6],
+              opacity: [0, 1],
+              x: [-100, 10, 0],
+              rotateZ: [-5, 2, 0],
             }}
             transition={{
-              ease: ["easeOut"],
-              duration: 0.3,
-              times: [0, 1],
-              delay: 4.7,
+              duration: 0.7,
+              times: [0, 0.7, 1],
+              ease: [0.34, 1.56, 0.64, 1],
+              delay: 4.8,
             }}
-            className={`mt-3 ${isFullScreen ? "text-xl md:text-2xl" : "text-sm"} text-center`}
+            className={`mt-4 ${isFullScreen ? "text-xl md:text-3xl" : "text-base"} font-semibold tracking-wide`}
           >
             {slide.stats}
           </motion.p>
         )}
+
+        {/* Snarky comment with pop effect */}
         <motion.p
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 0, scale: 0, rotateZ: -180 }}
           whileInView={{
-            opacity: [0, 0.5],
+            opacity: [0, 1],
+            scale: [0, 1.3, 1],
+            rotateZ: [-180, 10, 0],
           }}
           transition={{
-            ease: ["easeOut"],
-            duration: 0.3,
-            times: [0, 1],
-            delay: 5,
+            duration: 0.8,
+            times: [0, 0.6, 1],
+            ease: [0.68, -0.55, 0.265, 1.55],
+            delay: 5.3,
           }}
-          className={`mt-6 ${isFullScreen ? "text-xl md:text-2xl" : "text-sm"} text-center`}
+          className={`mt-8 ${isFullScreen ? "text-2xl md:text-3xl" : "text-base"} font-bold tracking-wide italic`}
         >
           {slide.followup}
         </motion.p>
