@@ -340,115 +340,95 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       key={index}
       className={`relative flex flex-col items-center justify-center text-white ${slide.gradient} ${
         isFullScreen ? "min-h-screen" : "aspect-[9/16]"
-      } overflow-hidden`}
+      } overflow-hidden px-6 md:px-12`}
+      style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
     >
-      {/* Pre-text with dramatic entrance and exit */}
+      {/* Pre-text with fade entrance */}
       <motion.p
-        className={`${isFullScreen ? "text-3xl md:text-5xl" : "text-xl"} font-semibold tracking-tight absolute ${
-          isFullScreen ? "top-1/4" : "top-1/4"
-        }`}
-        initial={{ opacity: 0, scale: 0.5, y: 50, rotateX: -90 }}
+        className={`${isFullScreen ? "text-base md:text-lg" : "text-xs"} font-bold tracking-wide uppercase absolute ${
+          isFullScreen ? "top-24 md:top-32" : "top-16"
+        } opacity-80`}
+        initial={{ opacity: 0, y: 20 }}
         whileInView={{
-          opacity: [0, 1, 1, 0],
-          scale: [0.5, 1.1, 1, 0.8],
-          y: [50, -10, 0, -100],
-          rotateX: [-90, 10, 0, 90],
+          opacity: [0, 0.8, 0.8, 0],
+          y: [20, 0, 0, -20],
         }}
         transition={{
-          duration: 3.5,
-          times: [0, 0.15, 0.75, 1],
-          ease: [0.43, 0.13, 0.23, 0.96],
+          duration: 3,
+          times: [0, 0.2, 0.7, 1],
+          ease: "easeInOut",
         }}
       >
         {slide.pretext}
       </motion.p>
 
-      <div className="text-center px-8 max-w-4xl">
-        {/* Title with bounce and scale effect */}
+      <div className="text-center w-full max-w-lg">
+        {/* Title with clean fade and scale */}
         <motion.h2
           className={`${
-            isFullScreen ? "text-5xl md:text-7xl" : "text-2xl"
-          } tracking-tighter font-black mb-6`}
-          initial={{ opacity: 0, scale: 0.3, rotateY: -180 }}
+            isFullScreen ? "text-5xl sm:text-6xl md:text-7xl lg:text-8xl" : "text-3xl"
+          } font-black mb-8 md:mb-12 leading-tight tracking-tight`}
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
           whileInView={{
             opacity: [0, 1],
-            scale: [0.3, 1.2, 1],
-            rotateY: [-180, 10, 0],
+            scale: [0.9, 1],
+            y: [20, 0],
           }}
           transition={{
-            duration: 0.8,
-            times: [0, 0.6, 1],
-            ease: [0.68, -0.55, 0.265, 1.55], // Bounce easing
-            delay: 3.5,
+            duration: 0.6,
+            delay: 3,
+            ease: [0.16, 1, 0.3, 1],
           }}
         >
           {slide.title}
         </motion.h2>
 
-        {/* Description with staggered word animations */}
+        {/* Description with smooth fade */}
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ delay: 4, duration: 0.3 }}
-          className={`${isFullScreen ? "text-3xl md:text-5xl" : "text-lg"} tracking-tight font-medium leading-relaxed`}
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: 3.3, duration: 0.5, ease: "easeOut" }}
+          className={`${isFullScreen ? "text-2xl sm:text-3xl md:text-4xl" : "text-lg"} leading-snug font-medium mb-6`}
         >
           {slide.description.map((entry, i) => (
-            <motion.span
+            <span
               key={i}
-              initial={{ opacity: 0, y: 20, scale: 0.8 }}
-              whileInView={{
-                opacity: 1,
-                y: 0,
-                scale: entry.type === "bold" ? [0.8, 1.15, 1] : 1,
-              }}
-              transition={{
-                delay: 4 + i * 0.1,
-                duration: 0.5,
-                ease: "easeOut",
-              }}
-              className={entry.type === "bold" ? "font-black text-white" : "font-light opacity-90"}
+              className={entry.type === "bold" ? "font-black" : "font-normal opacity-95"}
             >
               {entry.text}
-            </motion.span>
+            </span>
           ))}
         </motion.div>
 
-        {/* Stats line with slide in from side */}
+        {/* Stats line with fade */}
         {slide.stats && (
           <motion.p
-            initial={{ opacity: 0, x: -100, rotateZ: -5 }}
-            whileInView={{
-              opacity: [0, 1],
-              x: [-100, 10, 0],
-              rotateZ: [-5, 2, 0],
-            }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 0.75 }}
             transition={{
-              duration: 0.7,
-              times: [0, 0.7, 1],
-              ease: [0.34, 1.56, 0.64, 1],
-              delay: 4.8,
+              duration: 0.5,
+              delay: 3.6,
+              ease: "easeOut",
             }}
-            className={`mt-4 ${isFullScreen ? "text-xl md:text-3xl" : "text-base"} font-semibold tracking-wide`}
+            className={`${isFullScreen ? "text-lg md:text-xl" : "text-sm"} font-semibold opacity-75`}
           >
             {slide.stats}
           </motion.p>
         )}
 
-        {/* Snarky comment with pop effect */}
+        {/* Snarky comment with delayed fade */}
         <motion.p
-          initial={{ opacity: 0, scale: 0, rotateZ: -180 }}
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{
-            opacity: [0, 1],
-            scale: [0, 1.3, 1],
-            rotateZ: [-180, 10, 0],
+            opacity: [0, 0.7],
+            y: [10, 0],
           }}
           transition={{
-            duration: 0.8,
-            times: [0, 0.6, 1],
-            ease: [0.68, -0.55, 0.265, 1.55],
-            delay: 5.3,
+            duration: 0.5,
+            delay: 4,
+            ease: "easeOut",
           }}
-          className={`mt-8 ${isFullScreen ? "text-2xl md:text-3xl" : "text-base"} font-bold tracking-wide italic`}
+          className={`mt-8 md:mt-12 ${isFullScreen ? "text-lg md:text-2xl" : "text-sm"} font-bold opacity-70 italic`}
         >
           {slide.followup}
         </motion.p>
@@ -458,10 +438,10 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
 
   return (
     <>
-      {/* Compact Card View */}
-      <Card className="shadow-lg max-w-xs mx-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>A Year in Rearview</CardTitle>
+      {/* Compact Card View - Mobile First */}
+      <Card className="shadow-lg w-full max-w-xs mx-auto">
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <CardTitle className="text-lg">A Year in Rearview</CardTitle>
           <Button
             variant="ghost"
             size="icon"
@@ -471,21 +451,21 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
             <Maximize2 className="h-4 w-4" />
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pb-4">
           <Carousel className="aspect-[9/16]" setApi={setApi}>
             <CarouselContent className="flex w-full h-full aspect-[9/16]">
               {slides.map((slide, index) => renderSlide(slide, index, false))}
             </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
+            <CarouselPrevious className="left-2" />
+            <CarouselNext className="right-2" />
           </Carousel>
           {count > 0 && (
-            <div className="flex justify-center gap-2 mt-4">
+            <div className="flex justify-center gap-1.5 mt-3">
               {Array.from({ length: count }).map((_, index) => (
                 <div
                   key={index}
-                  className={`h-2 w-2 rounded-full transition-all ${
-                    index === current ? "bg-primary w-4" : "bg-muted"
+                  className={`h-1.5 rounded-full transition-all ${
+                    index === current ? "bg-primary w-6" : "bg-muted w-1.5"
                   }`}
                 />
               ))}
@@ -494,7 +474,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         </CardContent>
       </Card>
 
-      {/* Full-Screen Modal */}
+      {/* Full-Screen Modal - Touch Optimized */}
       <AnimatePresence>
         {isFullScreen && (
           <motion.div
@@ -508,24 +488,24 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
               variant="ghost"
               size="icon"
               onClick={() => setIsFullScreen(false)}
-              className="absolute top-4 right-4 z-50 h-12 w-12 rounded-full bg-background/10 hover:bg-background/20 text-white"
+              className="absolute top-4 right-4 z-50 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-background/10 hover:bg-background/20 text-white"
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
             <Carousel className="h-screen w-screen" setApi={setApi}>
               <CarouselContent className="h-screen">
                 {slides.map((slide, index) => renderSlide(slide, index, true))}
               </CarouselContent>
-              <CarouselPrevious className="left-4 h-12 w-12 bg-background/10 hover:bg-background/20 border-none text-white" />
-              <CarouselNext className="right-4 h-12 w-12 bg-background/10 hover:bg-background/20 border-none text-white" />
+              <CarouselPrevious className="left-2 sm:left-4 h-10 w-10 sm:h-12 sm:w-12 bg-background/10 hover:bg-background/20 border-none text-white" />
+              <CarouselNext className="right-2 sm:right-4 h-10 w-10 sm:h-12 sm:w-12 bg-background/10 hover:bg-background/20 border-none text-white" />
             </Carousel>
             {count > 0 && (
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex justify-center gap-3 z-50">
+              <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex justify-center gap-2 z-50">
                 {Array.from({ length: count }).map((_, index) => (
                   <div
                     key={index}
-                    className={`h-3 rounded-full transition-all ${
-                      index === current ? "bg-white w-8" : "bg-white/40 w-3"
+                    className={`h-2 sm:h-2.5 rounded-full transition-all ${
+                      index === current ? "bg-white w-6 sm:w-8" : "bg-white/40 w-2 sm:w-2.5"
                     }`}
                   />
                 ))}
