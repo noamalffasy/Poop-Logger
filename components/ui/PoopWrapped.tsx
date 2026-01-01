@@ -341,7 +341,6 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       className={`relative flex flex-col items-center justify-center text-white ${slide.gradient} ${
         isFullScreen ? "min-h-screen" : "aspect-[9/16]"
       } overflow-hidden px-6 md:px-12`}
-      style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
     >
       {/* Pre-text with fade entrance */}
       <motion.p
@@ -362,7 +361,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         {slide.pretext}
       </motion.p>
 
-      <div className="text-center w-full max-w-lg">
+      <div className="text-center w-full max-w-lg md:max-w-2xl">
         {/* Title with clean fade and scale */}
         <motion.h2
           className={`${
