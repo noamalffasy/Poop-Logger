@@ -173,9 +173,6 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     // Only generate comments if we have data
     if (yearData.length === 0) return;
 
-    const totalPoopsNum = totalPoops;
-    const streakNum = longestStreak;
-
     const comments: Record<string, { low: string[]; mid: string[]; high: string[] }> = {
       total: {
         low: [
@@ -311,13 +308,13 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     };
 
     // Generate context-aware comments
-    snarkyComments.total = getContextualComment("total", totalPoopsNum, { low: 50, high: 200 });
+    snarkyComments.total = getContextualComment("total", totalPoops, { low: 50, high: 200 });
     snarkyComments.mostDay = getContextualComment("mostDay", mostPoopsDateEntry[1], { low: 2, high: 5 });
     snarkyComments.mostMonth = getContextualComment("mostMonth", mostPoopsMonthEntry[1], { low: 10, high: 30 });
-    snarkyComments.streak = getContextualComment("streak", streakNum, { low: 3, high: 10 });
+    snarkyComments.streak = getContextualComment("streak", longestStreak, { low: 3, high: 10 });
     snarkyComments.hour = getContextualComment("hour", busiestHourCount, { low: 3, high: 10 });
     snarkyComments.weekday = getContextualComment("weekday", favoriteWeekdayEntry[1], { low: 5, high: 15 });
-  }, [selectedYear, yearData.length, avgPerDay, totalPoops, longestStreak, mostPoopsDateEntry, mostPoopsMonthEntry, busiestHourCount, favoriteWeekdayEntry]);
+  }, [selectedYear, yearData.length, totalPoops, longestStreak, mostPoopsDateEntry, mostPoopsMonthEntry, busiestHourCount, favoriteWeekdayEntry]);
 
   // If there's no data for the selected year, show a message
   if (yearData.length === 0) {
