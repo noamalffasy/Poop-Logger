@@ -75,14 +75,12 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     const interval = setInterval(() => {
       if (api.canScrollNext()) {
         api.scrollNext();
-      } else {
-        // Loop back to start
-        api.scrollTo(0);
       }
-    }, 5000); // 5 seconds per slide
+      // Don't loop back to start - stop at the end
+    }, 8000); // 8 seconds per slide (4s animations + 4s view time)
 
     return () => clearInterval(interval);
-  }, [isFullScreen, api]);
+  }, [isFullScreen, api, current]); // Reset timer when slide changes
 
   // Keyboard navigation
   useEffect(() => {
