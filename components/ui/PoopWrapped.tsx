@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "motion/react";
-import { Maximize2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Maximize2, X, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,6 +76,45 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isFullScreen, api]);
 
+  // Share slide as image
+  const handleShare = async (slideIndex: number) => {
+    try {
+      const slideElement = document.querySelector(`[data-slide-index="${slideIndex}"]`);
+      if (!slideElement) return;
+
+      // Use html2canvas if available, otherwise fall back to share text
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(slideElement as HTMLElement, {
+        backgroundColor: null,
+        scale: 2,
+      });
+      
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        
+        const file = new File([blob], `${selectedYear}-wrapped-slide-${slideIndex + 1}.png`, { type: 'image/png' });
+        
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: `${selectedYear} Wrapped - Slide ${slideIndex + 1}`,
+            text: `Check out my ${selectedYear} stats!`,
+            files: [file],
+          });
+        } else {
+          // Fallback: download the image
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${selectedYear}-wrapped-slide-${slideIndex + 1}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      });
+    } catch (error) {
+      console.error('Failed to share:', error);
+    }
+  };
+
   // If there's no data for the selected year, show a message
   if (yearData.length === 0) {
     return (
@@ -118,12 +157,20 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     b[1] > a[1] ? b : a
   );
 
-  // Calculate average per day
+  // Calculate average per day based on actual data span
   const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
-  const daysSinceYearStart = Math.ceil(
-    (Date.now() - new Date(currentYear, 0, 1).getTime()) / MILLISECONDS_PER_DAY
-  );
-  const avgPerDay = (totalPoops / daysSinceYearStart).toFixed(1);
+  
+  // Get the range of dates in the selected year's data
+  const yearDates = yearData.map(entry => {
+    const date = new Date(entry.timestamp);
+    date.setHours(0, 0, 0, 0);
+    return date.getTime();
+  });
+  
+  const minDate = Math.min(...yearDates);
+  const maxDate = Math.max(...yearDates);
+  const daysSpan = Math.max(1, Math.ceil((maxDate - minDate) / MILLISECONDS_PER_DAY) + 1);
+  const avgPerDay = (totalPoops / daysSpan).toFixed(1);
 
   // Calculate busiest hour
   const hourCounts = yearData.reduce((acc, entry) => {
@@ -179,9 +226,6 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     b[1] > a[1] ? b : a
   );
 
-  // Calculate percentile (top X% of poopers)
-  const percentile = Math.min(99, Math.max(1, Math.floor((totalPoops / 365) * 100)));
-
   const getSnarkyComment = (stat: string): string => {
     const comments: Record<string, string[]> = {
       total: [
@@ -231,14 +275,6 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         "Your body said 'NOT TODAY' to productivity on this day.",
         "This day is OWNED by your digestive system.",
         "Guess we found your favorite day of the week. 💀",
-      ],
-      percentile: [
-        "You're in the HALL OF FAME. We're building a statue.",
-        "Elite doesn't even BEGIN to cover this. 👑",
-        "You've transcended normal human limits. Congrats?",
-        "This level of dedication is... unsettling honestly.",
-        "You're not just top tier. You're LEGENDARY status.",
-        "The 1% we didn't know existed. But here we are.",
       ],
     };
 
@@ -335,25 +371,38 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       stats: `${favoriteWeekdayEntry[1]} visits on ${favoriteWeekdayEntry[0]}s`,
     },
     {
-      pretext: "The final verdict",
-      title: "Elite Tier Unlocked",
+      pretext: "Here's everything",
+      title: `${selectedYear} Summary`,
       description: [
-        { text: "Top ", type: "normal" },
-        { text: `${percentile}%`, type: "bold" },
-        { text: " performer worldwide", type: "normal" },
+        { text: "All your stats at a glance", type: "normal" },
       ],
-      followup: getSnarkyComment("percentile"),
-      gradient: "bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600",
+      followup: "What a year it's been! 📊",
+      gradient: "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600",
+      isSummary: true,
     },
   ];
 
-  const renderSlide = (slide: typeof slides[0], index: number, isFullScreen: boolean) => (
+  const renderSlide = (slide: typeof slides[0] & { isSummary?: boolean }, index: number, isFullScreen: boolean) => (
     <CarouselItem
       key={index}
+      data-slide-index={index}
       className={`relative flex flex-col items-center justify-center text-white ${slide.gradient} ${
         isFullScreen ? "min-h-screen" : "aspect-[9/16]"
       } overflow-hidden px-6 md:px-12`}
     >
+      {/* Share button for full-screen mode */}
+      {isFullScreen && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleShare(index)}
+          className="absolute top-4 left-4 z-50 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-background/10 hover:bg-background/20 text-white"
+          title="Share this slide"
+        >
+          <Share2 className="h-5 w-5 sm:h-6 sm:w-6" />
+        </Button>
+      )}
+
       {/* Pre-text with fade entrance */}
       <motion.p
         className={`${isFullScreen ? "text-base md:text-lg" : "text-xs"} font-bold tracking-wide uppercase absolute ${
@@ -425,6 +474,49 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
           >
             {slide.stats}
           </motion.p>
+        )}
+
+        {/* Summary stats grid */}
+        {slide.isSummary && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{
+              duration: 0.8,
+              delay: 3.3,
+              ease: "easeOut",
+            }}
+            className={`mt-8 md:mt-12 grid grid-cols-1 gap-4 ${isFullScreen ? "text-base md:text-lg" : "text-xs"} text-left w-full max-w-md`}
+          >
+            <div className="flex justify-between border-b border-white/20 pb-2">
+              <span className="opacity-70">Total Poops:</span>
+              <span className="font-bold">{totalPoops}</span>
+            </div>
+            <div className="flex justify-between border-b border-white/20 pb-2">
+              <span className="opacity-70">Average per Day:</span>
+              <span className="font-bold">{avgPerDay}</span>
+            </div>
+            <div className="flex justify-between border-b border-white/20 pb-2">
+              <span className="opacity-70">Record Day:</span>
+              <span className="font-bold">{mostPoopsDateEntry[0]}</span>
+            </div>
+            <div className="flex justify-between border-b border-white/20 pb-2">
+              <span className="opacity-70">Peak Month:</span>
+              <span className="font-bold">{new Date(mostPoopsMonthEntry[0]).toLocaleString("default", { month: "long" })}</span>
+            </div>
+            <div className="flex justify-between border-b border-white/20 pb-2">
+              <span className="opacity-70">Busiest Hour:</span>
+              <span className="font-bold">{busiestHourEntry[0]}</span>
+            </div>
+            <div className="flex justify-between border-b border-white/20 pb-2">
+              <span className="opacity-70">Longest Streak:</span>
+              <span className="font-bold">{longestStreak} days</span>
+            </div>
+            <div className="flex justify-between border-b border-white/20 pb-2">
+              <span className="opacity-70">Favorite Day:</span>
+              <span className="font-bold">{favoriteWeekdayEntry[0]}</span>
+            </div>
+          </motion.div>
         )}
 
         {/* Snarky comment with delayed fade */}
