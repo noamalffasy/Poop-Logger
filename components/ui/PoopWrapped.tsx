@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "motion/react";
 import { Maximize2, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -26,13 +26,18 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
 
-  // Get all available years from the data
-  const availableYears = Array.from(
-    new Set(data.map((entry) => new Date(entry.timestamp).getFullYear()))
-  ).sort((a, b) => b - a); // Sort descending (newest first)
+  // Get all available years from the data (memoized)
+  const availableYears = useMemo(() => 
+    Array.from(
+      new Set(data.map((entry) => new Date(entry.timestamp).getFullYear()))
+    ).sort((a, b) => b - a), // Sort descending (newest first)
+    [data]
+  );
 
   const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState(currentYear);
+  // Initialize with most recent available year or current year if it exists in data
+  const initialYear = availableYears.includes(currentYear) ? currentYear : availableYears[0];
+  const [selectedYear, setSelectedYear] = useState(initialYear);
 
   // Filter data to only include entries from the selected year
   const yearData = data.filter((entry) => {
