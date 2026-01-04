@@ -25,6 +25,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
+  const [lastManualChange, setLastManualChange] = useState(0); // Track manual navigation
   
   // Generate snarky comments once and keep them consistent
   const [snarkyComments] = useState(() => ({
@@ -80,7 +81,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     }, 8000); // 8 seconds per slide (4s animations + 4s view time)
 
     return () => clearInterval(interval);
-  }, [isFullScreen, api, current]); // Reset timer when slide changes
+  }, [isFullScreen, api, lastManualChange]); // Reset timer on manual navigation
 
   // Keyboard navigation
   useEffect(() => {
@@ -91,8 +92,10 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         setIsFullScreen(false);
       } else if (e.key === "ArrowRight") {
         api?.scrollNext();
+        setLastManualChange(Date.now()); // Reset timer
       } else if (e.key === "ArrowLeft") {
         api?.scrollPrev();
+        setLastManualChange(Date.now()); // Reset timer
       }
     };
 
@@ -450,11 +453,17 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         <>
           <div
             className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
-            onClick={() => api?.scrollPrev()}
+            onClick={() => {
+              api?.scrollPrev();
+              setLastManualChange(Date.now()); // Reset timer
+            }}
           />
           <div
             className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
-            onClick={() => api?.scrollNext()}
+            onClick={() => {
+              api?.scrollNext();
+              setLastManualChange(Date.now()); // Reset timer
+            }}
           />
         </>
       )}
