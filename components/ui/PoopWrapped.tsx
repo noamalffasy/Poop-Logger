@@ -162,6 +162,76 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     }
   };
 
+  // Initialize snarky comments once per year data change (before any early returns)
+  useEffect(() => {
+    // Only generate comments if we have data
+    if (yearData.length === 0) return;
+
+    const comments: Record<string, string[]> = {
+      total: [
+        "Holy sh*t! That's a lot of bathroom breaks! 💩",
+        "Your toilet paper budget must be INSANE.",
+        "The throne has seen more of you than your couch this year.",
+        "Your toilet's gonna file for worker's comp at this rate.",
+        "That's enough to fertilize a small farm. Just saying. 🌾",
+        "Someone's fiber intake is OFF THE CHARTS!",
+      ],
+      mostDay: [
+        "RIP your toilet. It never stood a chance that day. 🪦",
+        "We should've sent flowers to your bathroom after that.",
+        "Your toilet called in sick the next day, I heard.",
+        "That day will go down in infamy. Never forget. 🫡",
+        "Hope you had a good book handy that day...",
+        "Your toilet's therapy bills must be astronomical.",
+      ],
+      mostMonth: [
+        "That month was UNHINGED! What were you eating?! 😱",
+        "Did you lose a bet or something? Damn.",
+        "Your plumber is probably naming their yacht after you.",
+        "I'm calling Guinness World Records about this one.",
+        "That month was a CRIME SCENE. 🚨",
+        "Someone discovered Taco Bell that month, huh?",
+      ],
+      streak: [
+        "You're basically a sh*tting MACHINE at this point. 🤖",
+        "Most people can't commit to ANYTHING like this!",
+        "Your consistency is honestly terrifying.",
+        "This is either impressive or concerning. We're not sure.",
+        "You could set your watch by this. Literally.",
+        "Your intestines run tighter than a Swiss watch. ⏰",
+      ],
+      hour: [
+        "Your colon has better punctuality than most people.",
+        "This is clockwork at its FINEST. Or weirdest.",
+        "Hope your boss doesn't notice this pattern... 👀",
+        "Everyone knows not to book meetings during this time, right?",
+        "The prophecy has foretold this hour of reckoning.",
+        "Your body runs on a schedule even YOU can't change.",
+      ],
+      weekday: [
+        "Clearly this is your toilet's favorite day too. 🚽",
+        "Your bowels have STRONG opinions about this day.",
+        "Hope that's not during important meetings... 😬",
+        "Your body said 'NOT TODAY' to productivity on this day.",
+        "This day is OWNED by your digestive system.",
+        "Guess we found your favorite day of the week. 💀",
+      ],
+    };
+
+    const getRandomComment = (key: string) => {
+      const commentList = comments[key] || comments.total;
+      return commentList[Math.floor(Math.random() * commentList.length)];
+    };
+
+    // Generate comments once and store them
+    snarkyComments.total = getRandomComment("total");
+    snarkyComments.mostDay = getRandomComment("mostDay");
+    snarkyComments.mostMonth = getRandomComment("mostMonth");
+    snarkyComments.streak = getRandomComment("streak");
+    snarkyComments.hour = getRandomComment("hour");
+    snarkyComments.weekday = getRandomComment("weekday");
+  }, [selectedYear, yearData.length, snarkyComments]);
+
   // If there's no data for the selected year, show a message
   if (yearData.length === 0) {
     return (
@@ -272,73 +342,6 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   const favoriteWeekdayEntry = Object.entries(weekdayCounts).reduce((a, b) =>
     b[1] > a[1] ? b : a
   );
-
-  // Initialize snarky comments once per year data change
-  useEffect(() => {
-    const comments: Record<string, string[]> = {
-      total: [
-        "Holy sh*t! That's a lot of bathroom breaks! 💩",
-        "Your toilet paper budget must be INSANE.",
-        "The throne has seen more of you than your couch this year.",
-        "Your toilet's gonna file for worker's comp at this rate.",
-        "That's enough to fertilize a small farm. Just saying. 🌾",
-        "Someone's fiber intake is OFF THE CHARTS!",
-      ],
-      mostDay: [
-        "RIP your toilet. It never stood a chance that day. 🪦",
-        "We should've sent flowers to your bathroom after that.",
-        "Your toilet called in sick the next day, I heard.",
-        "That day will go down in infamy. Never forget. 🫡",
-        "Hope you had a good book handy that day...",
-        "Your toilet's therapy bills must be astronomical.",
-      ],
-      mostMonth: [
-        "That month was UNHINGED! What were you eating?! 😱",
-        "Did you lose a bet or something? Damn.",
-        "Your plumber is probably naming their yacht after you.",
-        "I'm calling Guinness World Records about this one.",
-        "That month was a CRIME SCENE. 🚨",
-        "Someone discovered Taco Bell that month, huh?",
-      ],
-      streak: [
-        "You're basically a sh*tting MACHINE at this point. 🤖",
-        "Most people can't commit to ANYTHING like this!",
-        "Your consistency is honestly terrifying.",
-        "This is either impressive or concerning. We're not sure.",
-        "You could set your watch by this. Literally.",
-        "Your intestines run tighter than a Swiss watch. ⏰",
-      ],
-      hour: [
-        "Your colon has better punctuality than most people.",
-        "This is clockwork at its FINEST. Or weirdest.",
-        "Hope your boss doesn't notice this pattern... 👀",
-        "Everyone knows not to book meetings during this time, right?",
-        "The prophecy has foretold this hour of reckoning.",
-        "Your body runs on a schedule even YOU can't change.",
-      ],
-      weekday: [
-        "Clearly this is your toilet's favorite day too. 🚽",
-        "Your bowels have STRONG opinions about this day.",
-        "Hope that's not during important meetings... 😬",
-        "Your body said 'NOT TODAY' to productivity on this day.",
-        "This day is OWNED by your digestive system.",
-        "Guess we found your favorite day of the week. 💀",
-      ],
-    };
-
-    const getRandomComment = (key: string) => {
-      const commentList = comments[key] || comments.total;
-      return commentList[Math.floor(Math.random() * commentList.length)];
-    };
-
-    // Generate comments once and store them
-    snarkyComments.total = getRandomComment("total");
-    snarkyComments.mostDay = getRandomComment("mostDay");
-    snarkyComments.mostMonth = getRandomComment("mostMonth");
-    snarkyComments.streak = getRandomComment("streak");
-    snarkyComments.hour = getRandomComment("hour");
-    snarkyComments.weekday = getRandomComment("weekday");
-  }, [selectedYear, snarkyComments]);
 
   const slides = [
     {
