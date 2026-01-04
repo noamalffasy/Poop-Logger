@@ -396,7 +396,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
           variant="ghost"
           size="icon"
           onClick={() => handleShare(index)}
-          className="absolute top-4 left-4 z-50 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-background/10 hover:bg-background/20 text-white"
+          className="absolute top-4 left-4 z-[60] h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-background/10 hover:bg-background/20 text-white"
           title="Share this slide"
         >
           <Share2 className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -627,7 +627,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
           >
             {/* Year selector in full-screen */}
             {availableYears.length > 1 && (
-              <div className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-background/10 backdrop-blur-sm rounded-full px-3 py-2">
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-background/10 backdrop-blur-sm rounded-full px-3 py-2">
                 <Button
                   variant="ghost"
                   size="icon"
