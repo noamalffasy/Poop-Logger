@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "motion/react";
-import { Maximize2, X } from "lucide-react";
+import { Maximize2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,11 +26,18 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
 
-  // Filter data to only include entries from the current year
+  // Get all available years from the data
+  const availableYears = Array.from(
+    new Set(data.map((entry) => new Date(entry.timestamp).getFullYear()))
+  ).sort((a, b) => b - a); // Sort descending (newest first)
+
   const currentYear = new Date().getFullYear();
-  const currentYearData = data.filter((entry) => {
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+
+  // Filter data to only include entries from the selected year
+  const yearData = data.filter((entry) => {
     const entryYear = new Date(entry.timestamp).getFullYear();
-    return entryYear === currentYear;
+    return entryYear === selectedYear;
   });
 
   useEffect(() => {
@@ -64,16 +71,16 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isFullScreen, api]);
 
-  // If there's no data for the current year, show a message
-  if (currentYearData.length === 0) {
+  // If there's no data for the selected year, show a message
+  if (yearData.length === 0) {
     return (
-      <Card className="shadow-lg max-w-xs mx-auto">
-        <CardHeader>
-          <CardTitle>A Year in Rearview</CardTitle>
+      <Card className="shadow-lg w-full max-w-xs mx-auto">
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <CardTitle className="text-lg">A Year in Rearview</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-center text-muted-foreground">
-            No data available for {currentYear} yet. Start logging to see your stats!
+            No data available for {selectedYear} yet. Start logging to see your stats!
           </p>
         </CardContent>
       </Card>
@@ -81,9 +88,9 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   }
 
   // Calculate statistics
-  const totalPoops = currentYearData.length;
+  const totalPoops = yearData.length;
 
-  const mostPoopsDate = currentYearData.reduce((acc, entry) => {
+  const mostPoopsDate = yearData.reduce((acc, entry) => {
     const date = new Date(entry.timestamp).toLocaleDateString();
     acc[date] = (acc[date] || 0) + 1;
     return acc;
@@ -93,7 +100,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     b[1] > a[1] ? b : a
   );
 
-  const mostPoopsMonth = currentYearData.reduce((acc, entry) => {
+  const mostPoopsMonth = yearData.reduce((acc, entry) => {
     const month = new Date(entry.timestamp).toLocaleString("default", {
       month: "long",
       year: "numeric",
@@ -114,7 +121,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   const avgPerDay = (totalPoops / daysSinceYearStart).toFixed(1);
 
   // Calculate busiest hour
-  const hourCounts = currentYearData.reduce((acc, entry) => {
+  const hourCounts = yearData.reduce((acc, entry) => {
     const hour = new Date(entry.timestamp).getHours();
     acc[hour] = (acc[hour] || 0) + 1;
     return acc;
@@ -130,7 +137,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     busiestHour < 12 ? `${busiestHour} AM` : `${busiestHour - 12} PM`;
 
   // Calculate longest streak
-  const sortedData = [...currentYearData].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedData = [...yearData].sort((a, b) => a.timestamp - b.timestamp);
   let longestStreak = 1;
   let currentStreak = 1;
 
@@ -157,7 +164,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   }
 
   // Calculate weekday distribution
-  const weekdayCounts = currentYearData.reduce((acc, entry) => {
+  const weekdayCounts = yearData.reduce((acc, entry) => {
     const day = new Date(entry.timestamp).toLocaleDateString("default", { weekday: "long" });
     acc[day] = (acc[day] || 0) + 1;
     return acc;
@@ -241,7 +248,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   const slides = [
     {
       pretext: "Brace yourself...",
-      title: `${currentYear} Wrapped`,
+      title: `${selectedYear} Wrapped`,
       description: [
         { text: "Your ", type: "normal" },
         { text: "BATHROOM HISTORY", type: "bold" },
@@ -257,7 +264,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         { text: "A whopping ", type: "normal" },
         { text: totalPoops.toString(), type: "bold" },
         { text: " logs in ", type: "normal" },
-        { text: currentYear.toString(), type: "bold" },
+        { text: selectedYear.toString(), type: "bold" },
       ],
       followup: getSnarkyComment("total"),
       gradient: "bg-gradient-to-br from-blue-600 via-cyan-600 to-teal-600",
@@ -441,14 +448,52 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       <Card className="shadow-lg w-full max-w-xs mx-auto">
         <CardHeader className="flex flex-row items-center justify-between pb-3">
           <CardTitle className="text-lg">A Year in Rearview</CardTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsFullScreen(true)}
-            className="h-8 w-8"
-          >
-            <Maximize2 className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            {/* Year selector */}
+            {availableYears.length > 1 && (
+              <div className="flex items-center gap-1 mr-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    const currentIndex = availableYears.indexOf(selectedYear);
+                    if (currentIndex < availableYears.length - 1) {
+                      setSelectedYear(availableYears[currentIndex + 1]);
+                    }
+                  }}
+                  disabled={selectedYear === availableYears[availableYears.length - 1]}
+                  className="h-7 w-7"
+                >
+                  <ChevronLeft className="h-3 w-3" />
+                </Button>
+                <span className="text-sm font-semibold min-w-[3rem] text-center">
+                  {selectedYear}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    const currentIndex = availableYears.indexOf(selectedYear);
+                    if (currentIndex > 0) {
+                      setSelectedYear(availableYears[currentIndex - 1]);
+                    }
+                  }}
+                  disabled={selectedYear === availableYears[0]}
+                  className="h-7 w-7"
+                >
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsFullScreen(true)}
+              className="h-8 w-8"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="pb-4">
           <Carousel className="aspect-[9/16]" setApi={setApi}>
@@ -483,6 +528,42 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-50 bg-background"
           >
+            {/* Year selector in full-screen */}
+            {availableYears.length > 1 && (
+              <div className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-background/10 backdrop-blur-sm rounded-full px-3 py-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    const currentIndex = availableYears.indexOf(selectedYear);
+                    if (currentIndex < availableYears.length - 1) {
+                      setSelectedYear(availableYears[currentIndex + 1]);
+                    }
+                  }}
+                  disabled={selectedYear === availableYears[availableYears.length - 1]}
+                  className="h-8 w-8 text-white hover:bg-white/20"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-white font-bold text-sm min-w-[3rem] text-center">
+                  {selectedYear}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    const currentIndex = availableYears.indexOf(selectedYear);
+                    if (currentIndex > 0) {
+                      setSelectedYear(availableYears[currentIndex - 1]);
+                    }
+                  }}
+                  disabled={selectedYear === availableYears[0]}
+                  className="h-8 w-8 text-white hover:bg-white/20"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
             <Button
               variant="ghost"
               size="icon"
