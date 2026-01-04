@@ -94,7 +94,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         
         const file = new File([blob], `${selectedYear}-wrapped-slide-${slideIndex + 1}.png`, { type: 'image/png' });
         
-        if (navigator.share && navigator.canShare({ files: [file] })) {
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             title: `${selectedYear} Wrapped - Slide ${slideIndex + 1}`,
             text: `Check out my ${selectedYear} stats!`,
@@ -167,8 +167,8 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     return date.getTime();
   });
   
-  const minDate = Math.min(...yearDates);
-  const maxDate = Math.max(...yearDates);
+  const minDate = yearDates.length > 0 ? Math.min(...yearDates) : Date.now();
+  const maxDate = yearDates.length > 0 ? Math.max(...yearDates) : Date.now();
   const daysSpan = Math.max(1, Math.ceil((maxDate - minDate) / MILLISECONDS_PER_DAY) + 1);
   const avgPerDay = (totalPoops / daysSpan).toFixed(1);
 
@@ -502,7 +502,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
             </div>
             <div className="flex justify-between border-b border-white/20 pb-2">
               <span className="opacity-70">Peak Month:</span>
-              <span className="font-bold">{new Date(mostPoopsMonthEntry[0]).toLocaleString("default", { month: "long" })}</span>
+              <span className="font-bold">{mostPoopsMonthEntry[0]}</span>
             </div>
             <div className="flex justify-between border-b border-white/20 pb-2">
               <span className="opacity-70">Busiest Hour:</span>
