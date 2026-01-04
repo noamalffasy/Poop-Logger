@@ -106,7 +106,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   // Share slide as image
   const handleShare = async (slideIndex: number) => {
     try {
-      const slideElement = document.querySelector(`[data-slide-index="${slideIndex}"]`);
+      const slideElement = document.querySelector(`[data-slide-content="${slideIndex}"]`);
       if (!slideElement) {
         console.error('Slide element not found for index:', slideIndex);
         return;
@@ -115,11 +115,16 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       // Dynamically import html2canvas
       const html2canvas = (await import('html2canvas')).default;
       
+      // Wait a bit to ensure all animations and rendering are complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const canvas = await html2canvas(slideElement as HTMLElement, {
         backgroundColor: null,
         scale: 2,
         logging: false,
         useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
       });
       
       canvas.toBlob(async (blob) => {
@@ -168,70 +173,151 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     // Only generate comments if we have data
     if (yearData.length === 0) return;
 
-    const comments: Record<string, string[]> = {
-      total: [
-        "Holy sh*t! That's a lot of bathroom breaks! 💩",
-        "Your toilet paper budget must be INSANE.",
-        "The throne has seen more of you than your couch this year.",
-        "Your toilet's gonna file for worker's comp at this rate.",
-        "That's enough to fertilize a small farm. Just saying. 🌾",
-        "Someone's fiber intake is OFF THE CHARTS!",
-      ],
-      mostDay: [
-        "RIP your toilet. It never stood a chance that day. 🪦",
-        "We should've sent flowers to your bathroom after that.",
-        "Your toilet called in sick the next day, I heard.",
-        "That day will go down in infamy. Never forget. 🫡",
-        "Hope you had a good book handy that day...",
-        "Your toilet's therapy bills must be astronomical.",
-      ],
-      mostMonth: [
-        "That month was UNHINGED! What were you eating?! 😱",
-        "Did you lose a bet or something? Damn.",
-        "Your plumber is probably naming their yacht after you.",
-        "I'm calling Guinness World Records about this one.",
-        "That month was a CRIME SCENE. 🚨",
-        "Someone discovered Taco Bell that month, huh?",
-      ],
-      streak: [
-        "You're basically a sh*tting MACHINE at this point. 🤖",
-        "Most people can't commit to ANYTHING like this!",
-        "Your consistency is honestly terrifying.",
-        "This is either impressive or concerning. We're not sure.",
-        "You could set your watch by this. Literally.",
-        "Your intestines run tighter than a Swiss watch. ⏰",
-      ],
-      hour: [
-        "Your colon has better punctuality than most people.",
-        "This is clockwork at its FINEST. Or weirdest.",
-        "Hope your boss doesn't notice this pattern... 👀",
-        "Everyone knows not to book meetings during this time, right?",
-        "The prophecy has foretold this hour of reckoning.",
-        "Your body runs on a schedule even YOU can't change.",
-      ],
-      weekday: [
-        "Clearly this is your toilet's favorite day too. 🚽",
-        "Your bowels have STRONG opinions about this day.",
-        "Hope that's not during important meetings... 😬",
-        "Your body said 'NOT TODAY' to productivity on this day.",
-        "This day is OWNED by your digestive system.",
-        "Guess we found your favorite day of the week. 💀",
-      ],
+    const totalPoopsNum = totalPoops;
+    const streakNum = longestStreak;
+
+    const comments: Record<string, { low: string[]; mid: string[]; high: string[] }> = {
+      total: {
+        low: [
+          "Quality over quantity, right? 🤔",
+          "Just getting started, we see.",
+          "Rookie numbers, but everyone starts somewhere!",
+        ],
+        mid: [
+          "Pretty standard bathroom activity here.",
+          "Your digestive system is running on schedule.",
+          "A respectable amount of bathroom visits.",
+        ],
+        high: [
+          "Holy sh*t! That's a lot of bathroom breaks! 💩",
+          "Your toilet paper budget must be INSANE.",
+          "The throne has seen more of you than your couch this year.",
+          "Your toilet's gonna file for worker's comp at this rate.",
+          "That's enough to fertilize a small farm. Just saying. 🌾",
+          "Someone's fiber intake is OFF THE CHARTS!",
+        ],
+      },
+      mostDay: {
+        low: [
+          "A quiet day in bathroom history.",
+          "That day was... unremarkable. 📅",
+          "Just another day on the throne.",
+        ],
+        mid: [
+          "That day had some activity, for sure.",
+          "Your bathroom saw some action that day.",
+          "A moderately busy day for your toilet.",
+        ],
+        high: [
+          "RIP your toilet. It never stood a chance that day. 🪦",
+          "We should've sent flowers to your bathroom after that.",
+          "Your toilet called in sick the next day, I heard.",
+          "That day will go down in infamy. Never forget. 🫡",
+          "Hope you had a good book handy that day...",
+          "Your toilet's therapy bills must be astronomical.",
+        ],
+      },
+      mostMonth: {
+        low: [
+          "A slow month in the bathroom department.",
+          "Your toilet got a vacation that month. 🏖️",
+          "Not much happening in the throne room that month.",
+        ],
+        mid: [
+          "A pretty average month for bathroom activity.",
+          "That month kept things steady.",
+          "Moderate bathroom traffic that month.",
+        ],
+        high: [
+          "That month was UNHINGED! What were you eating?! 😱",
+          "Did you lose a bet or something? Damn.",
+          "Your plumber is probably naming their yacht after you.",
+          "I'm calling Guinness World Records about this one.",
+          "That month was a CRIME SCENE. 🚨",
+          "Someone discovered Taco Bell that month, huh?",
+        ],
+      },
+      streak: {
+        low: [
+          "Hey, consistency is hard!",
+          "Everyone has their own rhythm. 🎵",
+          "Short but sweet streak.",
+        ],
+        mid: [
+          "A solid streak going there!",
+          "Not bad for keeping the routine.",
+          "Your body knows what it's doing.",
+        ],
+        high: [
+          "You're basically a sh*tting MACHINE at this point. 🤖",
+          "Most people can't commit to ANYTHING like this!",
+          "Your consistency is honestly terrifying.",
+          "This is either impressive or concerning. We're not sure.",
+          "You could set your watch by this. Literally.",
+          "Your intestines run tighter than a Swiss watch. ⏰",
+        ],
+      },
+      hour: {
+        low: [
+          "Your bathroom schedule is... flexible.",
+          "No particular time preference detected.",
+          "You keep your toilet guessing. 🎲",
+        ],
+        mid: [
+          "There's a pattern forming here...",
+          "Your body has a preference, we see.",
+          "Semi-regular bathroom timing detected.",
+        ],
+        high: [
+          "Your colon has better punctuality than most people.",
+          "This is clockwork at its FINEST. Or weirdest.",
+          "Hope your boss doesn't notice this pattern... 👀",
+          "Everyone knows not to book meetings during this time, right?",
+          "The prophecy has foretold this hour of reckoning.",
+          "Your body runs on a schedule even YOU can't change.",
+        ],
+      },
+      weekday: {
+        low: [
+          "No strong weekday preference here.",
+          "Your body is an equal opportunity pooper. 🗓️",
+          "All days are created equal in your bathroom.",
+        ],
+        mid: [
+          "Starting to see a favorite day emerge...",
+          "Your body has opinions about this day.",
+          "This day gets some special attention.",
+        ],
+        high: [
+          "Clearly this is your toilet's favorite day too. 🚽",
+          "Your bowels have STRONG opinions about this day.",
+          "Hope that's not during important meetings... 😬",
+          "Your body said 'NOT TODAY' to productivity on this day.",
+          "This day is OWNED by your digestive system.",
+          "Guess we found your favorite day of the week. 💀",
+        ],
+      },
     };
 
-    const getRandomComment = (key: string) => {
-      const commentList = comments[key] || comments.total;
+    const getContextualComment = (key: string, value: number, thresholds: { low: number; high: number }) => {
+      const commentSet = comments[key];
+      let level: 'low' | 'mid' | 'high' = 'mid';
+      
+      if (value <= thresholds.low) level = 'low';
+      else if (value >= thresholds.high) level = 'high';
+      
+      const commentList = commentSet[level];
       return commentList[Math.floor(Math.random() * commentList.length)];
     };
 
-    // Generate comments once and store them
-    snarkyComments.total = getRandomComment("total");
-    snarkyComments.mostDay = getRandomComment("mostDay");
-    snarkyComments.mostMonth = getRandomComment("mostMonth");
-    snarkyComments.streak = getRandomComment("streak");
-    snarkyComments.hour = getRandomComment("hour");
-    snarkyComments.weekday = getRandomComment("weekday");
-  }, [selectedYear, yearData.length, snarkyComments]);
+    // Generate context-aware comments
+    snarkyComments.total = getContextualComment("total", totalPoopsNum, { low: 50, high: 200 });
+    snarkyComments.mostDay = getContextualComment("mostDay", mostPoopsDateEntry[1], { low: 2, high: 5 });
+    snarkyComments.mostMonth = getContextualComment("mostMonth", mostPoopsMonthEntry[1], { low: 10, high: 30 });
+    snarkyComments.streak = getContextualComment("streak", streakNum, { low: 3, high: 10 });
+    snarkyComments.hour = getContextualComment("hour", busiestHourCount, { low: 3, high: 10 });
+    snarkyComments.weekday = getContextualComment("weekday", favoriteWeekdayEntry[1], { low: 5, high: 15 });
+  }, [selectedYear, yearData.length, snarkyComments, avgPerDay, totalPoops, longestStreak, mostPoopsDateEntry, mostPoopsMonthEntry, busiestHourCount, favoriteWeekdayEntry]);
 
   // If there's no data for the selected year, show a message
   if (yearData.length === 0) {
@@ -448,7 +534,147 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         isFullScreen ? "min-h-screen" : "aspect-[9/16]"
       } overflow-hidden px-6 md:px-12`}
     >
-      {/* Tap zones for navigation in full-screen */}
+      {/* Wrapper for screenshot capture */}
+      <div 
+        data-slide-content={index}
+        className="absolute inset-0 flex flex-col items-center justify-center px-6 md:px-12"
+      >
+        {/* Pre-text with fade entrance */}
+        <motion.p
+          className={`${isFullScreen ? "text-base md:text-lg" : "text-xs"} font-bold tracking-wide uppercase absolute ${
+            isFullScreen ? "top-24 md:top-32" : "top-16"
+          } opacity-80`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{
+            opacity: [0, 0.8, 0.8, 0],
+            y: [20, 0, 0, -20],
+          }}
+          transition={{
+            duration: 3,
+            times: [0, 0.2, 0.7, 1],
+            ease: "easeInOut",
+          }}
+        >
+          {slide.pretext}
+        </motion.p>
+
+        <div className="text-center w-full max-w-lg md:max-w-2xl">
+          {/* Title with clean fade and scale */}
+          <motion.h2
+            className={`${
+              isFullScreen ? "text-5xl sm:text-6xl md:text-7xl lg:text-8xl" : "text-3xl"
+            } font-black mb-8 md:mb-12 leading-tight tracking-tight`}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{
+              opacity: [0, 1],
+              scale: [0.9, 1],
+              y: [20, 0],
+            }}
+            transition={{
+              duration: 0.6,
+              delay: 3,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+          >
+            {slide.title}
+          </motion.h2>
+
+          {/* Description with smooth fade */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 3.3, duration: 0.5, ease: "easeOut" }}
+            className={`${isFullScreen ? "text-2xl sm:text-3xl md:text-4xl" : "text-lg"} leading-snug font-medium mb-6`}
+          >
+            {slide.description.map((entry, i) => (
+              <span
+                key={i}
+                className={entry.type === "bold" ? "font-black" : "font-normal opacity-95"}
+              >
+                {entry.text}
+              </span>
+            ))}
+          </motion.div>
+
+          {/* Stats line with fade */}
+          {slide.stats && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.75 }}
+              transition={{
+                duration: 0.5,
+                delay: 3.6,
+                ease: "easeOut",
+              }}
+              className={`${isFullScreen ? "text-lg md:text-xl" : "text-sm"} font-semibold opacity-75`}
+            >
+              {slide.stats}
+            </motion.p>
+          )}
+
+          {/* Summary stats grid */}
+          {slide.isSummary && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{
+                duration: 0.8,
+                delay: 3.3,
+                ease: "easeOut",
+              }}
+              className={`mt-8 md:mt-12 grid grid-cols-1 gap-4 ${isFullScreen ? "text-base md:text-lg" : "text-xs"} text-left w-full max-w-md`}
+            >
+              <div className="flex justify-between border-b border-white/20 pb-2">
+                <span className="opacity-70">Total Poops:</span>
+                <span className="font-bold">{totalPoops}</span>
+              </div>
+              <div className="flex justify-between border-b border-white/20 pb-2">
+                <span className="opacity-70">Average per Day:</span>
+                <span className="font-bold">{avgPerDay}</span>
+              </div>
+              <div className="flex justify-between border-b border-white/20 pb-2">
+                <span className="opacity-70">Record Day:</span>
+                <span className="font-bold">{mostPoopsDateEntry[0]}</span>
+              </div>
+              <div className="flex justify-between border-b border-white/20 pb-2">
+                <span className="opacity-70">Peak Month:</span>
+                <span className="font-bold">{mostPoopsMonthEntry[0]}</span>
+              </div>
+              <div className="flex justify-between border-b border-white/20 pb-2">
+                <span className="opacity-70">Busiest Hour:</span>
+                <span className="font-bold">{busiestHourEntry[0]}</span>
+              </div>
+              <div className="flex justify-between border-b border-white/20 pb-2">
+                <span className="opacity-70">Longest Streak:</span>
+                <span className="font-bold">{longestStreak} days</span>
+              </div>
+              <div className="flex justify-between border-b border-white/20 pb-2">
+                <span className="opacity-70">Favorite Day:</span>
+                <span className="font-bold">{favoriteWeekdayEntry[0]}</span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Snarky comment with delayed fade */}
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{
+              opacity: [0, 0.7],
+              y: [10, 0],
+            }}
+            transition={{
+              duration: 0.5,
+              delay: 4,
+              ease: "easeOut",
+            }}
+            className={`mt-8 md:mt-12 ${isFullScreen ? "text-lg md:text-2xl" : "text-sm"} font-bold opacity-70 italic`}
+          >
+            {slide.followup}
+          </motion.p>
+        </div>
+      </div>
+
+      {/* Tap zones for navigation in full-screen (outside screenshot area) */}
       {isFullScreen && (
         <>
           <div
@@ -467,140 +693,6 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
           />
         </>
       )}
-
-      {/* Pre-text with fade entrance */}
-      <motion.p
-        className={`${isFullScreen ? "text-base md:text-lg" : "text-xs"} font-bold tracking-wide uppercase absolute ${
-          isFullScreen ? "top-24 md:top-32" : "top-16"
-        } opacity-80`}
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{
-          opacity: [0, 0.8, 0.8, 0],
-          y: [20, 0, 0, -20],
-        }}
-        transition={{
-          duration: 3,
-          times: [0, 0.2, 0.7, 1],
-          ease: "easeInOut",
-        }}
-      >
-        {slide.pretext}
-      </motion.p>
-
-      <div className="text-center w-full max-w-lg md:max-w-2xl">
-        {/* Title with clean fade and scale */}
-        <motion.h2
-          className={`${
-            isFullScreen ? "text-5xl sm:text-6xl md:text-7xl lg:text-8xl" : "text-3xl"
-          } font-black mb-8 md:mb-12 leading-tight tracking-tight`}
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          whileInView={{
-            opacity: [0, 1],
-            scale: [0.9, 1],
-            y: [20, 0],
-          }}
-          transition={{
-            duration: 0.6,
-            delay: 3,
-            ease: [0.16, 1, 0.3, 1],
-          }}
-        >
-          {slide.title}
-        </motion.h2>
-
-        {/* Description with smooth fade */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 3.3, duration: 0.5, ease: "easeOut" }}
-          className={`${isFullScreen ? "text-2xl sm:text-3xl md:text-4xl" : "text-lg"} leading-snug font-medium mb-6`}
-        >
-          {slide.description.map((entry, i) => (
-            <span
-              key={i}
-              className={entry.type === "bold" ? "font-black" : "font-normal opacity-95"}
-            >
-              {entry.text}
-            </span>
-          ))}
-        </motion.div>
-
-        {/* Stats line with fade */}
-        {slide.stats && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 0.75 }}
-            transition={{
-              duration: 0.5,
-              delay: 3.6,
-              ease: "easeOut",
-            }}
-            className={`${isFullScreen ? "text-lg md:text-xl" : "text-sm"} font-semibold opacity-75`}
-          >
-            {slide.stats}
-          </motion.p>
-        )}
-
-        {/* Summary stats grid */}
-        {slide.isSummary && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{
-              duration: 0.8,
-              delay: 3.3,
-              ease: "easeOut",
-            }}
-            className={`mt-8 md:mt-12 grid grid-cols-1 gap-4 ${isFullScreen ? "text-base md:text-lg" : "text-xs"} text-left w-full max-w-md`}
-          >
-            <div className="flex justify-between border-b border-white/20 pb-2">
-              <span className="opacity-70">Total Poops:</span>
-              <span className="font-bold">{totalPoops}</span>
-            </div>
-            <div className="flex justify-between border-b border-white/20 pb-2">
-              <span className="opacity-70">Average per Day:</span>
-              <span className="font-bold">{avgPerDay}</span>
-            </div>
-            <div className="flex justify-between border-b border-white/20 pb-2">
-              <span className="opacity-70">Record Day:</span>
-              <span className="font-bold">{mostPoopsDateEntry[0]}</span>
-            </div>
-            <div className="flex justify-between border-b border-white/20 pb-2">
-              <span className="opacity-70">Peak Month:</span>
-              <span className="font-bold">{mostPoopsMonthEntry[0]}</span>
-            </div>
-            <div className="flex justify-between border-b border-white/20 pb-2">
-              <span className="opacity-70">Busiest Hour:</span>
-              <span className="font-bold">{busiestHourEntry[0]}</span>
-            </div>
-            <div className="flex justify-between border-b border-white/20 pb-2">
-              <span className="opacity-70">Longest Streak:</span>
-              <span className="font-bold">{longestStreak} days</span>
-            </div>
-            <div className="flex justify-between border-b border-white/20 pb-2">
-              <span className="opacity-70">Favorite Day:</span>
-              <span className="font-bold">{favoriteWeekdayEntry[0]}</span>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Snarky comment with delayed fade */}
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{
-            opacity: [0, 0.7],
-            y: [10, 0],
-          }}
-          transition={{
-            duration: 0.5,
-            delay: 4,
-            ease: "easeOut",
-          }}
-          className={`mt-8 md:mt-12 ${isFullScreen ? "text-lg md:text-2xl" : "text-sm"} font-bold opacity-70 italic`}
-        >
-          {slide.followup}
-        </motion.p>
-      </div>
     </CarouselItem>
   );
 
