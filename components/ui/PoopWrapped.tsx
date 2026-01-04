@@ -25,6 +25,16 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
+  
+  // Generate snarky comments once and keep them consistent
+  const [snarkyComments] = useState(() => ({
+    total: "",
+    mostDay: "",
+    mostMonth: "",
+    streak: "",
+    hour: "",
+    weekday: "",
+  }));
 
   // Get all available years from the data (memoized)
   const availableYears = useMemo(() => 
@@ -58,6 +68,22 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     });
   }, [api]);
 
+  // Autoplay in full-screen mode
+  useEffect(() => {
+    if (!isFullScreen || !api) return;
+
+    const interval = setInterval(() => {
+      if (api.canScrollNext()) {
+        api.scrollNext();
+      } else {
+        // Loop back to start
+        api.scrollTo(0);
+      }
+    }, 5000); // 5 seconds per slide
+
+    return () => clearInterval(interval);
+  }, [isFullScreen, api]);
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -80,38 +106,59 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   const handleShare = async (slideIndex: number) => {
     try {
       const slideElement = document.querySelector(`[data-slide-index="${slideIndex}"]`);
-      if (!slideElement) return;
+      if (!slideElement) {
+        console.error('Slide element not found for index:', slideIndex);
+        return;
+      }
 
-      // Use html2canvas if available, otherwise fall back to share text
+      // Dynamically import html2canvas
       const html2canvas = (await import('html2canvas')).default;
+      
       const canvas = await html2canvas(slideElement as HTMLElement, {
         backgroundColor: null,
         scale: 2,
+        logging: false,
+        useCORS: true,
       });
       
       canvas.toBlob(async (blob) => {
-        if (!blob) return;
+        if (!blob) {
+          console.error('Failed to create blob from canvas');
+          return;
+        }
         
         const file = new File([blob], `${selectedYear}-wrapped-slide-${slideIndex + 1}.png`, { type: 'image/png' });
         
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: `${selectedYear} Wrapped - Slide ${slideIndex + 1}`,
-            text: `Check out my ${selectedYear} stats!`,
-            files: [file],
-          });
-        } else {
-          // Fallback: download the image
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${selectedYear}-wrapped-slide-${slideIndex + 1}.png`;
-          a.click();
-          URL.revokeObjectURL(url);
+        // Check if Web Share API is available and supports files
+        if (navigator.share && navigator.canShare) {
+          try {
+            const canShareFiles = navigator.canShare({ files: [file] });
+            if (canShareFiles) {
+              await navigator.share({
+                title: `${selectedYear} Wrapped - Slide ${slideIndex + 1}`,
+                text: `Check out my ${selectedYear} stats!`,
+                files: [file],
+              });
+              return;
+            }
+          } catch (shareError) {
+            console.error('Share failed:', shareError);
+          }
         }
-      });
+        
+        // Fallback: download the image
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${selectedYear}-wrapped-slide-${slideIndex + 1}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 'image/png');
     } catch (error) {
       console.error('Failed to share:', error);
+      alert('Failed to share. Please try again.');
     }
   };
 
@@ -226,7 +273,8 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     b[1] > a[1] ? b : a
   );
 
-  const getSnarkyComment = (stat: string): string => {
+  // Initialize snarky comments once per year data change
+  useEffect(() => {
     const comments: Record<string, string[]> = {
       total: [
         "Holy sh*t! That's a lot of bathroom breaks! 💩",
@@ -283,8 +331,14 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       return commentList[Math.floor(Math.random() * commentList.length)];
     };
 
-    return getRandomComment(stat);
-  };
+    // Generate comments once and store them
+    snarkyComments.total = getRandomComment("total");
+    snarkyComments.mostDay = getRandomComment("mostDay");
+    snarkyComments.mostMonth = getRandomComment("mostMonth");
+    snarkyComments.streak = getRandomComment("streak");
+    snarkyComments.hour = getRandomComment("hour");
+    snarkyComments.weekday = getRandomComment("weekday");
+  }, [selectedYear, snarkyComments]);
 
   const slides = [
     {
@@ -307,7 +361,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         { text: " logs in ", type: "normal" },
         { text: selectedYear.toString(), type: "bold" },
       ],
-      followup: getSnarkyComment("total"),
+      followup: snarkyComments.total,
       gradient: "bg-gradient-to-br from-blue-600 via-cyan-600 to-teal-600",
       stats: `${avgPerDay} times per day (we're counting)`,
     },
@@ -320,7 +374,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         { text: mostPoopsDateEntry[1].toString(), type: "bold" },
         { text: " bathroom trips", type: "normal" },
       ],
-      followup: getSnarkyComment("mostDay"),
+      followup: snarkyComments.mostDay,
       gradient: "bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600",
     },
     {
@@ -331,7 +385,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         { text: " was absolutely ", type: "normal" },
         { text: "LEGENDARY", type: "bold" },
       ],
-      followup: getSnarkyComment("mostMonth"),
+      followup: snarkyComments.mostMonth,
       gradient: "bg-gradient-to-br from-green-500 via-emerald-600 to-teal-600",
       stats: `${mostPoopsMonthEntry[1]} poops that month`,
     },
@@ -343,7 +397,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         { text: busiestHourFormatted, type: "bold" },
         { text: " like clockwork", type: "normal" },
       ],
-      followup: getSnarkyComment("hour"),
+      followup: snarkyComments.hour,
       gradient: "bg-gradient-to-br from-orange-500 via-red-600 to-pink-600",
       stats: `${busiestHourCount} times at this exact hour`,
     },
@@ -355,7 +409,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         { text: " consecutive days of ", type: "normal" },
         { text: "PEAK PERFORMANCE", type: "bold" },
       ],
-      followup: getSnarkyComment("streak"),
+      followup: snarkyComments.streak,
       gradient: "bg-gradient-to-br from-yellow-500 via-orange-600 to-red-600",
     },
     {
@@ -366,7 +420,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         { text: "OWNS", type: "bold" },
         { text: " this day", type: "normal" },
       ],
-      followup: getSnarkyComment("weekday"),
+      followup: snarkyComments.weekday,
       gradient: "bg-gradient-to-br from-pink-500 via-rose-600 to-red-600",
       stats: `${favoriteWeekdayEntry[1]} visits on ${favoriteWeekdayEntry[0]}s`,
     },
@@ -390,17 +444,18 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         isFullScreen ? "min-h-screen" : "aspect-[9/16]"
       } overflow-hidden px-6 md:px-12`}
     >
-      {/* Share button for full-screen mode */}
+      {/* Tap zones for navigation in full-screen */}
       {isFullScreen && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => handleShare(index)}
-          className="absolute top-4 left-4 z-[60] h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-background/10 hover:bg-background/20 text-white"
-          title="Share this slide"
-        >
-          <Share2 className="h-5 w-5 sm:h-6 sm:w-6" />
-        </Button>
+        <>
+          <div
+            className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
+            onClick={() => api?.scrollPrev()}
+          />
+          <div
+            className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
+            onClick={() => api?.scrollNext()}
+          />
+        </>
       )}
 
       {/* Pre-text with fade entrance */}
@@ -625,6 +680,17 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-50 bg-background"
           >
+            {/* Floating share button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleShare(current)}
+              className="absolute top-4 left-4 z-50 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-background/10 hover:bg-background/20 text-white"
+              title="Share this slide"
+            >
+              <Share2 className="h-5 w-5 sm:h-6 sm:w-6" />
+            </Button>
+
             {/* Year selector in full-screen */}
             {availableYears.length > 1 && (
               <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-background/10 backdrop-blur-sm rounded-full px-3 py-2">
@@ -673,8 +739,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
               <CarouselContent className="h-screen">
                 {slides.map((slide, index) => renderSlide(slide, index, true))}
               </CarouselContent>
-              <CarouselPrevious className="left-2 sm:left-4 h-10 w-10 sm:h-12 sm:w-12 bg-background/10 hover:bg-background/20 border-none text-white" />
-              <CarouselNext className="right-2 sm:right-4 h-10 w-10 sm:h-12 sm:w-12 bg-background/10 hover:bg-background/20 border-none text-white" />
+              {/* Hidden prev/next buttons - navigation via tap zones instead */}
             </Carousel>
             {count > 0 && (
               <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex justify-center gap-2 z-50">
