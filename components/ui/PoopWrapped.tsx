@@ -317,7 +317,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     snarkyComments.streak = getContextualComment("streak", streakNum, { low: 3, high: 10 });
     snarkyComments.hour = getContextualComment("hour", busiestHourCount, { low: 3, high: 10 });
     snarkyComments.weekday = getContextualComment("weekday", favoriteWeekdayEntry[1], { low: 5, high: 15 });
-  }, [selectedYear, yearData.length, snarkyComments, avgPerDay, totalPoops, longestStreak, mostPoopsDateEntry, mostPoopsMonthEntry, busiestHourCount, favoriteWeekdayEntry]);
+  }, [selectedYear, yearData.length, avgPerDay, totalPoops, longestStreak, mostPoopsDateEntry, mostPoopsMonthEntry, busiestHourCount, favoriteWeekdayEntry]);
 
   // If there's no data for the selected year, show a message
   if (yearData.length === 0) {
