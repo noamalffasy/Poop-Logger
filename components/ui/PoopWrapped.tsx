@@ -181,7 +181,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       acc[date] = (acc[date] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    const mostPoopsDateCount = Math.max(...Object.values(mostPoopsDateMap));
+    const mostPoopsDateCount = Object.values(mostPoopsDateMap).length > 0 ? Math.max(...Object.values(mostPoopsDateMap)) : 0;
 
     const mostPoopsMonthMap = yearData.reduce((acc, entry) => {
       const month = new Date(entry.timestamp).toLocaleString("default", {
@@ -191,14 +191,14 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       acc[month] = (acc[month] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    const mostPoopsMonthCount = Math.max(...Object.values(mostPoopsMonthMap));
+    const mostPoopsMonthCount = Object.values(mostPoopsMonthMap).length > 0 ? Math.max(...Object.values(mostPoopsMonthMap)) : 0;
 
     const hourCountsMap = yearData.reduce((acc, entry) => {
       const hour = new Date(entry.timestamp).getHours();
       acc[hour] = (acc[hour] || 0) + 1;
       return acc;
     }, {} as Record<number, number>);
-    const busiestHourCountValue = Math.max(...Object.values(hourCountsMap));
+    const busiestHourCountValue = Object.values(hourCountsMap).length > 0 ? Math.max(...Object.values(hourCountsMap)) : 0;
 
     const sortedDataList = [...yearData].sort((a, b) => a.timestamp - b.timestamp);
     let longest = 1;
@@ -230,7 +230,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       acc[day] = (acc[day] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    const favoriteWeekdayCount = Math.max(...Object.values(weekdayCountsMap));
+    const favoriteWeekdayCount = Object.values(weekdayCountsMap).length > 0 ? Math.max(...Object.values(weekdayCountsMap)) : 0;
 
     const comments: Record<string, { low: string[]; mid: string[]; high: string[] }> = {
       total: {
