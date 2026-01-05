@@ -51,10 +51,11 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   const [selectedYear, setSelectedYear] = useState(initialYear);
 
   // Filter data to only include entries from the selected year
-  const yearData = data.filter((entry) => {
+  // Memoize yearData to prevent unnecessary recalculations and useEffect re-runs
+  const yearData = useMemo(() => data.filter((entry) => {
     const entryYear = new Date(entry.timestamp).getFullYear();
     return entryYear === selectedYear;
-  });
+  }), [data, selectedYear]);
 
   useEffect(() => {
     if (!api) {
@@ -109,14 +110,15 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       const slideElement = document.querySelector(`[data-slide-content="${slideIndex}"]`);
       if (!slideElement) {
         console.error('Slide element not found for index:', slideIndex);
+        alert('Could not find slide to share. Please try again.');
         return;
       }
 
       // Dynamically import html2canvas
       const html2canvas = (await import('html2canvas')).default;
       
-      // Wait a bit to ensure all animations and rendering are complete
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait longer to ensure all animations and rendering are complete
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       const canvas = await html2canvas(slideElement as HTMLElement, {
         backgroundColor: null,
