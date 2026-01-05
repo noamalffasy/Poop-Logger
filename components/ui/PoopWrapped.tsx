@@ -173,6 +173,66 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     // Only generate comments if we have data
     if (yearData.length === 0) return;
 
+    // Calculate statistics needed for contextual comments
+    const totalPoops = yearData.length;
+
+    const mostPoopsDate = yearData.reduce((acc, entry) => {
+      const date = new Date(entry.timestamp).toLocaleDateString();
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const mostPoopsDateEntry = Object.entries(mostPoopsDate).reduce((a, b) => b[1] > a[1] ? b : a);
+
+    const mostPoopsMonth = yearData.reduce((acc, entry) => {
+      const month = new Date(entry.timestamp).toLocaleString("default", {
+        month: "long",
+        year: "numeric",
+      });
+      acc[month] = (acc[month] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const mostPoopsMonthEntry = Object.entries(mostPoopsMonth).reduce((a, b) => b[1] > a[1] ? b : a);
+
+    const hourCounts = yearData.reduce((acc, entry) => {
+      const hour = new Date(entry.timestamp).getHours();
+      acc[hour] = (acc[hour] || 0) + 1;
+      return acc;
+    }, {} as Record<number, number>);
+    const busiestHourEntry = Object.entries(hourCounts).reduce((a, b) => b[1] > a[1] ? b : a);
+    const busiestHourCount = busiestHourEntry[1];
+
+    const sortedData = [...yearData].sort((a, b) => a.timestamp - b.timestamp);
+    let longestStreak = 1;
+    let currentStreak = 1;
+    const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+
+    if (sortedData.length > 1) {
+      let lastDate = new Date(sortedData[0].timestamp);
+      lastDate.setHours(0, 0, 0, 0);
+
+      for (let i = 1; i < sortedData.length; i++) {
+        const currentDate = new Date(sortedData[i].timestamp);
+        currentDate.setHours(0, 0, 0, 0);
+        const dayDiff = Math.floor((currentDate.getTime() - lastDate.getTime()) / MILLISECONDS_PER_DAY);
+
+        if (dayDiff === 0) continue;
+        if (dayDiff === 1) {
+          currentStreak++;
+          longestStreak = Math.max(longestStreak, currentStreak);
+        } else if (dayDiff > 1) {
+          currentStreak = 1;
+        }
+        lastDate = currentDate;
+      }
+    }
+
+    const weekdayCounts = yearData.reduce((acc, entry) => {
+      const day = new Date(entry.timestamp).toLocaleDateString("default", { weekday: "long" });
+      acc[day] = (acc[day] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const favoriteWeekdayEntry = Object.entries(weekdayCounts).reduce((a, b) => b[1] > a[1] ? b : a);
+
     const comments: Record<string, { low: string[]; mid: string[]; high: string[] }> = {
       total: {
         low: [
@@ -307,14 +367,9 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       return commentList[Math.floor(Math.random() * commentList.length)];
     };
 
-    // Generate context-aware comments
-    snarkyComments.total = getContextualComment("total", totalPoops, { low: 50, high: 200 });
-    snarkyComments.mostDay = getContextualComment("mostDay", mostPoopsDateEntry[1], { low: 2, high: 5 });
-    snarkyComments.mostMonth = getContextualComment("mostMonth", mostPoopsMonthEntry[1], { low: 10, high: 30 });
-    snarkyComments.streak = getContextualComment("streak", longestStreak, { low: 3, high: 10 });
-    snarkyComments.hour = getContextualComment("hour", busiestHourCount, { low: 3, high: 10 });
-    snarkyComments.weekday = getContextualComment("weekday", favoriteWeekdayEntry[1], { low: 5, high: 15 });
-  }, [selectedYear, yearData.length, totalPoops, longestStreak, mostPoopsDateEntry, mostPoopsMonthEntry, busiestHourCount, favoriteWeekdayEntry]);
+    // Generate context-aware comments - dependencies removed to avoid circular dependency
+    // Comments will be regenerated when selectedYear or yearData changes
+  }, [selectedYear, yearData]);
 
   // If there's no data for the selected year, show a message
   if (yearData.length === 0) {
