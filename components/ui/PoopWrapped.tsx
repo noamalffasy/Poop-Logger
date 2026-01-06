@@ -155,22 +155,17 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
           reject(new Error('canvas.toBlob timed out'));
         }, 10000);
 
-        try {
-          canvas.toBlob((result) => {
-            window.clearTimeout(timeoutId);
-
-            if (!result) {
-              console.error('Failed to create blob from canvas');
-              reject(new Error('Failed to create blob from canvas'));
-              return;
-            }
-
-            resolve(result);
-          }, 'image/png');
-        } catch (toBlobError) {
+        canvas.toBlob((result) => {
           window.clearTimeout(timeoutId);
-          reject(toBlobError instanceof Error ? toBlobError : new Error(String(toBlobError)));
-        }
+
+          if (!result) {
+            console.error('Failed to create blob from canvas');
+            reject(new Error('Failed to create blob from canvas'));
+            return;
+          }
+
+          resolve(result);
+        }, 'image/png');
       });
 
       const file = new File([blob], `${selectedYear}-wrapped-slide-${slideIndex + 1}.png`, { type: 'image/png' });
@@ -224,9 +219,10 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       acc[date] = (acc[date] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    const mostPoopsDateEntry = Object.entries(mostPoopsDate).reduce((a, b) =>
-      b[1] > a[1] ? b : a
-    );
+    const mostPoopsDateEntries = Object.entries(mostPoopsDate);
+    const mostPoopsDateEntry = mostPoopsDateEntries.length > 0 
+      ? mostPoopsDateEntries.reduce((a, b) => b[1] > a[1] ? b : a)
+      : ['N/A', 0];
     const mostPoopsDateCount = mostPoopsDateEntry[1];
 
     // Most poops in a month
@@ -238,9 +234,10 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       acc[month] = (acc[month] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    const mostPoopsMonthEntry = Object.entries(mostPoopsMonth).reduce((a, b) =>
-      b[1] > a[1] ? b : a
-    );
+    const mostPoopsMonthEntries = Object.entries(mostPoopsMonth);
+    const mostPoopsMonthEntry = mostPoopsMonthEntries.length > 0
+      ? mostPoopsMonthEntries.reduce((a, b) => b[1] > a[1] ? b : a)
+      : ['N/A', 0];
     const mostPoopsMonthCount = mostPoopsMonthEntry[1];
 
     // Average per day based on actual data span
@@ -260,9 +257,10 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       acc[hour] = (acc[hour] || 0) + 1;
       return acc;
     }, {} as Record<number, number>);
-    const busiestHourEntry = Object.entries(hourCounts).reduce((a, b) =>
-      b[1] > a[1] ? b : a
-    );
+    const busiestHourEntries = Object.entries(hourCounts);
+    const busiestHourEntry = busiestHourEntries.length > 0
+      ? busiestHourEntries.reduce((a, b) => b[1] > a[1] ? b : a)
+      : ['0', 0];
     const busiestHour = parseInt(busiestHourEntry[0]);
     const busiestHourCount = busiestHourEntry[1];
     const busiestHourFormatted = busiestHour === 0 ? "12 AM" : 
@@ -301,9 +299,10 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       acc[day] = (acc[day] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    const favoriteWeekdayEntry = Object.entries(weekdayCounts).reduce((a, b) =>
-      b[1] > a[1] ? b : a
-    );
+    const favoriteWeekdayEntries = Object.entries(weekdayCounts);
+    const favoriteWeekdayEntry = favoriteWeekdayEntries.length > 0
+      ? favoriteWeekdayEntries.reduce((a, b) => b[1] > a[1] ? b : a)
+      : ['N/A', 0];
     const favoriteWeekdayCount = favoriteWeekdayEntry[1];
 
     return {
@@ -597,7 +596,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       gradient: "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600",
       isSummary: true,
     },
-  ], [selectedYear, totalPoops, mostPoopsDateEntry, mostPoopsMonthEntry, avgPerDay, busiestHourFormatted, busiestHourCount, longestStreak, favoriteWeekdayEntry, snarkyComments]);
+  ], [stats, snarkyComments, selectedYear]);
 
   const renderSlide = (slide: typeof slides[0] & { isSummary?: boolean }, index: number, isFullScreen: boolean) => (
     <CarouselItem
