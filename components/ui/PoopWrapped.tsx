@@ -46,8 +46,12 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
   );
 
   const currentYear = new Date().getFullYear();
-  // Initialize with most recent available year or current year if it exists in data
-  const initialYear = availableYears.includes(currentYear) ? currentYear : availableYears[0];
+  // Initialize with most recent available year or current year if it exists in data,
+  // and fall back to current year if there is no data yet.
+  const initialYear =
+    availableYears.length > 0
+      ? (availableYears.includes(currentYear) ? currentYear : availableYears[0])
+      : currentYear;
   const [selectedYear, setSelectedYear] = useState(initialYear);
 
   // Filter data to only include entries from the selected year
@@ -65,9 +69,15 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap());
 
-    api.on("select", () => {
+    const handleSelect = () => {
       setCurrent(api.selectedScrollSnap());
-    });
+    };
+
+    api.on("select", handleSelect);
+
+    return () => {
+      api.off("select", handleSelect);
+    };
   }, [api]);
 
   // Autoplay in full-screen mode
@@ -702,7 +712,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
               </div>
               <div className="flex justify-between border-b border-white/20 pb-2">
                 <span className="opacity-70">Busiest Hour:</span>
-                <span className="font-bold">{busiestHourEntry[0]}</span>
+                <span className="font-bold">{busiestHourFormatted}</span>
               </div>
               <div className="flex justify-between border-b border-white/20 pb-2">
                 <span className="opacity-70">Longest Streak:</span>
@@ -738,19 +748,53 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       {isFullScreen && (
         <>
           <div
-            className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
+            className="absolute left-0 top-16 bottom-0 w-1/3 cursor-pointer z-10 group"
             onClick={() => {
               api?.scrollPrev();
               setLastManualChange(Date.now()); // Reset timer
             }}
-          />
+            aria-label="Previous slide"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                api?.scrollPrev();
+                setLastManualChange(Date.now());
+              }
+            }}
+          >
+            <div className="absolute inset-y-0 left-4 hidden md:flex items-center">
+              <ChevronLeft
+                className="h-8 w-8 text-white/70 opacity-0 group-hover:opacity-70 transition-opacity duration-200 pointer-events-none"
+                aria-hidden="true"
+              />
+            </div>
+            <span className="sr-only">Previous slide</span>
+          </div>
           <div
-            className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
+            className="absolute right-0 top-16 bottom-0 w-1/3 cursor-pointer z-10 group"
             onClick={() => {
               api?.scrollNext();
               setLastManualChange(Date.now()); // Reset timer
             }}
-          />
+            aria-label="Next slide"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                api?.scrollNext();
+                setLastManualChange(Date.now());
+              }
+            }}
+          >
+            <div className="absolute inset-y-0 right-4 hidden md:flex items-center justify-end">
+              <ChevronRight
+                className="h-8 w-8 text-white/70 opacity-0 group-hover:opacity-70 transition-opacity duration-200 pointer-events-none"
+                aria-hidden="true"
+              />
+            </div>
+            <span className="sr-only">Next slide</span>
+          </div>
         </>
       )}
     </CarouselItem>
@@ -848,7 +892,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
               size="icon"
               onClick={() => handleShare(current)}
               className="absolute top-4 left-4 z-50 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-background/10 hover:bg-background/20 text-white"
-              title="Share this slide"
+              aria-label="Share current slide"
             >
               <Share2 className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
@@ -894,6 +938,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
               size="icon"
               onClick={() => setIsFullScreen(false)}
               className="absolute top-4 right-4 z-50 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-background/10 hover:bg-background/20 text-white"
+              aria-label="Close fullscreen view"
             >
               <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
@@ -904,15 +949,27 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
               {/* Hidden prev/next buttons - navigation via tap zones instead */}
             </Carousel>
             {count > 0 && (
-              <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex justify-center gap-2 z-50">
-                {Array.from({ length: count }).map((_, index) => (
-                  <div
-                    key={index}
-                    className={`h-2 sm:h-2.5 rounded-full transition-all ${
-                      index === current ? "bg-white w-6 sm:w-8" : "bg-white/40 w-2 sm:w-2.5"
-                    }`}
-                  />
-                ))}
+              <div 
+                className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex justify-center gap-2 z-50"
+                role="tablist"
+                aria-label="Carousel slides"
+              >
+                {Array.from({ length: count }).map((_, index) => {
+                  const isActive = index === current;
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      role="tab"
+                      aria-current={isActive ? "true" : undefined}
+                      aria-label={`Slide ${index + 1} of ${count}${isActive ? ", current slide" : ""}`}
+                      onClick={() => api?.scrollTo(index)}
+                      className={`h-2 sm:h-2.5 rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+                        isActive ? "bg-white w-6 sm:w-8" : "bg-white/40 w-2 sm:w-2.5"
+                      }`}
+                    />
+                  );
+                })}
               </div>
             )}
           </motion.div>
