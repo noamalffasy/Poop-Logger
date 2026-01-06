@@ -82,6 +82,13 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     };
   }, [api]);
 
+  // Reset carousel to first slide when year changes
+  useEffect(() => {
+    if (api) {
+      api.scrollTo(0);
+    }
+  }, [api, selectedYear]);
+
   // Autoplay in full-screen mode
   useEffect(() => {
     if (!isFullScreen || !api) return;
@@ -141,63 +148,89 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
         foreignObjectRendering: false,
       });
       
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          console.error('Failed to create blob from canvas');
-          return;
-        }
-        
-        const file = new File([blob], `${selectedYear}-wrapped-slide-${slideIndex + 1}.png`, { type: 'image/png' });
-        
-        // Check if Web Share API is available and supports files
-        if (navigator.share && navigator.canShare) {
-          try {
-            const canShareFiles = navigator.canShare({ files: [file] });
-            if (canShareFiles) {
-              await navigator.share({
-                title: `${selectedYear} Wrapped - Slide ${slideIndex + 1}`,
-                text: `Check out my ${selectedYear} stats!`,
-                files: [file],
-              });
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        const timeoutId = window.setTimeout(() => {
+          console.error('canvas.toBlob timed out');
+          alert('Sharing is taking longer than expected. Please try again.');
+          reject(new Error('canvas.toBlob timed out'));
+        }, 10000);
+
+        try {
+          canvas.toBlob((result) => {
+            window.clearTimeout(timeoutId);
+
+            if (!result) {
+              console.error('Failed to create blob from canvas');
+              reject(new Error('Failed to create blob from canvas'));
               return;
             }
-          } catch (shareError) {
-            console.error('Share failed:', shareError);
-          }
+
+            resolve(result);
+          }, 'image/png');
+        } catch (toBlobError) {
+          window.clearTimeout(timeoutId);
+          reject(toBlobError instanceof Error ? toBlobError : new Error(String(toBlobError)));
         }
-        
-        // Fallback: download the image
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${selectedYear}-wrapped-slide-${slideIndex + 1}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 'image/png');
+      });
+
+      const file = new File([blob], `${selectedYear}-wrapped-slide-${slideIndex + 1}.png`, { type: 'image/png' });
+
+      // Check if Web Share API is available and supports files
+      if (navigator.share && navigator.canShare) {
+        try {
+          const canShareFiles = navigator.canShare({ files: [file] });
+          if (canShareFiles) {
+            await navigator.share({
+              title: `${selectedYear} Wrapped - Slide ${slideIndex + 1}`,
+              text: `Check out my ${selectedYear} stats!`,
+              files: [file],
+            });
+            return;
+          }
+        } catch (shareError) {
+          console.error('Share failed:', shareError);
+        }
+      }
+
+      // Fallback: download the image
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedYear}-wrapped-slide-${slideIndex + 1}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Failed to share:', error);
       alert('Failed to share. Please try again.');
     }
   };
 
-  // Calculate statistics and generate contextual snarky comments
-  useEffect(() => {
-    // Only generate comments if we have data
-    if (yearData.length === 0) return;
+  // Memoized statistics calculations to avoid duplication
+  const stats = useMemo(() => {
+    if (yearData.length === 0) {
+      return null;
+    }
 
-    // Calculate all statistics
-    const total = yearData.length;
+    const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 
-    const mostPoopsDateMap = yearData.reduce((acc, entry) => {
+    // Total poops
+    const totalPoops = yearData.length;
+
+    // Most poops in a single day
+    const mostPoopsDate = yearData.reduce((acc, entry) => {
       const date = new Date(entry.timestamp).toLocaleDateString();
       acc[date] = (acc[date] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    const mostPoopsDateCount = Object.values(mostPoopsDateMap).length > 0 ? Math.max(...Object.values(mostPoopsDateMap)) : 0;
+    const mostPoopsDateEntry = Object.entries(mostPoopsDate).reduce((a, b) =>
+      b[1] > a[1] ? b : a
+    );
+    const mostPoopsDateCount = mostPoopsDateEntry[1];
 
-    const mostPoopsMonthMap = yearData.reduce((acc, entry) => {
+    // Most poops in a month
+    const mostPoopsMonth = yearData.reduce((acc, entry) => {
       const month = new Date(entry.timestamp).toLocaleString("default", {
         month: "long",
         year: "numeric",
@@ -205,46 +238,96 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       acc[month] = (acc[month] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    const mostPoopsMonthCount = Object.values(mostPoopsMonthMap).length > 0 ? Math.max(...Object.values(mostPoopsMonthMap)) : 0;
+    const mostPoopsMonthEntry = Object.entries(mostPoopsMonth).reduce((a, b) =>
+      b[1] > a[1] ? b : a
+    );
+    const mostPoopsMonthCount = mostPoopsMonthEntry[1];
 
-    const hourCountsMap = yearData.reduce((acc, entry) => {
+    // Average per day based on actual data span
+    const yearDates = yearData.map(entry => {
+      const date = new Date(entry.timestamp);
+      date.setHours(0, 0, 0, 0);
+      return date.getTime();
+    });
+    const minDate = yearDates.length > 0 ? Math.min(...yearDates) : Date.now();
+    const maxDate = yearDates.length > 0 ? Math.max(...yearDates) : Date.now();
+    const daysSpan = Math.max(1, Math.ceil((maxDate - minDate) / MILLISECONDS_PER_DAY) + 1);
+    const avgPerDay = (totalPoops / daysSpan).toFixed(1);
+
+    // Busiest hour
+    const hourCounts = yearData.reduce((acc, entry) => {
       const hour = new Date(entry.timestamp).getHours();
       acc[hour] = (acc[hour] || 0) + 1;
       return acc;
     }, {} as Record<number, number>);
-    const busiestHourCountValue = Object.values(hourCountsMap).length > 0 ? Math.max(...Object.values(hourCountsMap)) : 0;
+    const busiestHourEntry = Object.entries(hourCounts).reduce((a, b) =>
+      b[1] > a[1] ? b : a
+    );
+    const busiestHour = parseInt(busiestHourEntry[0]);
+    const busiestHourCount = busiestHourEntry[1];
+    const busiestHourFormatted = busiestHour === 0 ? "12 AM" : 
+      busiestHour === 12 ? "12 PM" :
+      busiestHour < 12 ? `${busiestHour} AM` : `${busiestHour - 12} PM`;
 
-    const sortedDataList = [...yearData].sort((a, b) => a.timestamp - b.timestamp);
-    let longest = 1;
-    let currentStreakCount = 1;
-    const MS_PER_DAY = 1000 * 60 * 60 * 24;
+    // Longest streak
+    const sortedData = [...yearData].sort((a, b) => a.timestamp - b.timestamp);
+    let longestStreak = 1;
+    let currentStreak = 1;
 
-    if (sortedDataList.length > 1) {
-      let lastDateValue = new Date(sortedDataList[0].timestamp);
-      lastDateValue.setHours(0, 0, 0, 0);
+    if (sortedData.length > 1) {
+      let lastDate = new Date(sortedData[0].timestamp);
+      lastDate.setHours(0, 0, 0, 0);
 
-      for (let i = 1; i < sortedDataList.length; i++) {
-        const currentDate = new Date(sortedDataList[i].timestamp);
+      for (let i = 1; i < sortedData.length; i++) {
+        const currentDate = new Date(sortedData[i].timestamp);
         currentDate.setHours(0, 0, 0, 0);
-        const dayDiff = Math.floor((currentDate.getTime() - lastDateValue.getTime()) / MS_PER_DAY);
-
-        if (dayDiff === 0) continue;
-        if (dayDiff === 1) {
-          currentStreakCount++;
-          longest = Math.max(longest, currentStreakCount);
+        const dayDiff = Math.floor((currentDate.getTime() - lastDate.getTime()) / MILLISECONDS_PER_DAY);
+        
+        if (dayDiff === 0) {
+          continue;
+        } else if (dayDiff === 1) {
+          currentStreak++;
+          longestStreak = Math.max(longestStreak, currentStreak);
         } else if (dayDiff > 1) {
-          currentStreakCount = 1;
+          currentStreak = 1;
         }
-        lastDateValue = currentDate;
+        lastDate = currentDate;
       }
     }
 
-    const weekdayCountsMap = yearData.reduce((acc, entry) => {
+    // Weekday distribution
+    const weekdayCounts = yearData.reduce((acc, entry) => {
       const day = new Date(entry.timestamp).toLocaleDateString("default", { weekday: "long" });
       acc[day] = (acc[day] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    const favoriteWeekdayCount = Object.values(weekdayCountsMap).length > 0 ? Math.max(...Object.values(weekdayCountsMap)) : 0;
+    const favoriteWeekdayEntry = Object.entries(weekdayCounts).reduce((a, b) =>
+      b[1] > a[1] ? b : a
+    );
+    const favoriteWeekdayCount = favoriteWeekdayEntry[1];
+
+    return {
+      totalPoops,
+      mostPoopsDateEntry,
+      mostPoopsDateCount,
+      mostPoopsMonthEntry,
+      mostPoopsMonthCount,
+      avgPerDay,
+      busiestHour,
+      busiestHourCount,
+      busiestHourFormatted,
+      longestStreak,
+      favoriteWeekdayEntry,
+      favoriteWeekdayCount,
+    };
+  }, [yearData]);
+
+  // Calculate statistics and generate contextual snarky comments
+  useEffect(() => {
+    // Only generate comments if we have data
+    if (!stats) return;
+
+    const { totalPoops, mostPoopsDateCount, mostPoopsMonthCount, busiestHourCount, longestStreak, favoriteWeekdayCount } = stats;
 
     const comments: Record<string, { low: string[]; mid: string[]; high: string[] }> = {
       total: {
@@ -382,17 +465,17 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
 
     // Generate context-aware comments
     setSnarkyComments({
-      total: getContextualComment("total", total, { low: 50, high: 200 }),
+      total: getContextualComment("total", totalPoops, { low: 50, high: 200 }),
       mostDay: getContextualComment("mostDay", mostPoopsDateCount, { low: 2, high: 5 }),
       mostMonth: getContextualComment("mostMonth", mostPoopsMonthCount, { low: 10, high: 40 }),
-      hour: getContextualComment("hour", busiestHourCountValue, { low: 3, high: 10 }),
-      streak: getContextualComment("streak", longest, { low: 3, high: 10 }),
+      hour: getContextualComment("hour", busiestHourCount, { low: 3, high: 10 }),
+      streak: getContextualComment("streak", longestStreak, { low: 3, high: 10 }),
       weekday: getContextualComment("weekday", favoriteWeekdayCount, { low: 5, high: 15 }),
     });
-  }, [selectedYear, yearData]);
+  }, [selectedYear, stats]);
 
   // If there's no data for the selected year, show a message
-  if (yearData.length === 0) {
+  if (!stats) {
     return (
       <Card className="shadow-lg w-full max-w-xs mx-auto">
         <CardHeader className="flex flex-row items-center justify-between pb-3">
@@ -407,102 +490,20 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     );
   }
 
-  // Calculate statistics
-  const totalPoops = yearData.length;
+  // Destructure stats for easier access
+  const { 
+    totalPoops,
+    mostPoopsDateEntry,
+    mostPoopsMonthEntry,
+    avgPerDay,
+    busiestHourFormatted,
+    busiestHourCount,
+    longestStreak,
+    favoriteWeekdayEntry
+  } = stats;
 
-  const mostPoopsDate = yearData.reduce((acc, entry) => {
-    const date = new Date(entry.timestamp).toLocaleDateString();
-    acc[date] = (acc[date] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const mostPoopsDateEntry = Object.entries(mostPoopsDate).reduce((a, b) =>
-    b[1] > a[1] ? b : a
-  );
-
-  const mostPoopsMonth = yearData.reduce((acc, entry) => {
-    const month = new Date(entry.timestamp).toLocaleString("default", {
-      month: "long",
-      year: "numeric",
-    });
-    acc[month] = (acc[month] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const mostPoopsMonthEntry = Object.entries(mostPoopsMonth).reduce((a, b) =>
-    b[1] > a[1] ? b : a
-  );
-
-  // Calculate average per day based on actual data span
-  const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
-  
-  // Get the range of dates in the selected year's data
-  const yearDates = yearData.map(entry => {
-    const date = new Date(entry.timestamp);
-    date.setHours(0, 0, 0, 0);
-    return date.getTime();
-  });
-  
-  const minDate = yearDates.length > 0 ? Math.min(...yearDates) : Date.now();
-  const maxDate = yearDates.length > 0 ? Math.max(...yearDates) : Date.now();
-  const daysSpan = Math.max(1, Math.ceil((maxDate - minDate) / MILLISECONDS_PER_DAY) + 1);
-  const avgPerDay = (totalPoops / daysSpan).toFixed(1);
-
-  // Calculate busiest hour
-  const hourCounts = yearData.reduce((acc, entry) => {
-    const hour = new Date(entry.timestamp).getHours();
-    acc[hour] = (acc[hour] || 0) + 1;
-    return acc;
-  }, {} as Record<number, number>);
-
-  const busiestHourEntry = Object.entries(hourCounts).reduce((a, b) =>
-    b[1] > a[1] ? b : a
-  );
-  const busiestHour = parseInt(busiestHourEntry[0]);
-  const busiestHourCount = busiestHourEntry[1];
-  const busiestHourFormatted = busiestHour === 0 ? "12 AM" : 
-    busiestHour === 12 ? "12 PM" :
-    busiestHour < 12 ? `${busiestHour} AM` : `${busiestHour - 12} PM`;
-
-  // Calculate longest streak
-  const sortedData = [...yearData].sort((a, b) => a.timestamp - b.timestamp);
-  let longestStreak = 1;
-  let currentStreak = 1;
-
-  if (sortedData.length > 1) {
-    let lastDate = new Date(sortedData[0].timestamp);
-    lastDate.setHours(0, 0, 0, 0);
-
-    for (let i = 1; i < sortedData.length; i++) {
-      const currentDate = new Date(sortedData[i].timestamp);
-      currentDate.setHours(0, 0, 0, 0);
-      const dayDiff = Math.floor((currentDate.getTime() - lastDate.getTime()) / MILLISECONDS_PER_DAY);
-      
-      if (dayDiff === 0) {
-        // Same day, continue streak
-        continue;
-      } else if (dayDiff === 1) {
-        currentStreak++;
-        longestStreak = Math.max(longestStreak, currentStreak);
-      } else if (dayDiff > 1) {
-        currentStreak = 1;
-      }
-      lastDate = currentDate;
-    }
-  }
-
-  // Calculate weekday distribution
-  const weekdayCounts = yearData.reduce((acc, entry) => {
-    const day = new Date(entry.timestamp).toLocaleDateString("default", { weekday: "long" });
-    acc[day] = (acc[day] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const favoriteWeekdayEntry = Object.entries(weekdayCounts).reduce((a, b) =>
-    b[1] > a[1] ? b : a
-  );
-
-  const slides = [
+  // Memoize slides array to avoid recalculation on every render
+  const slides = useMemo(() => [
     {
       pretext: "Brace yourself...",
       title: `${selectedYear} Wrapped`,
@@ -596,7 +597,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       gradient: "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600",
       isSummary: true,
     },
-  ];
+  ], [selectedYear, totalPoops, mostPoopsDateEntry, mostPoopsMonthEntry, avgPerDay, busiestHourFormatted, busiestHourCount, longestStreak, favoriteWeekdayEntry, snarkyComments]);
 
   const renderSlide = (slide: typeof slides[0] & { isSummary?: boolean }, index: number, isFullScreen: boolean) => (
     <CarouselItem
@@ -761,6 +762,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault(); // Prevent page scroll
                 api?.scrollPrev();
                 setLastManualChange(Date.now());
               }
@@ -785,6 +787,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault(); // Prevent page scroll
                 api?.scrollNext();
                 setLastManualChange(Date.now());
               }
