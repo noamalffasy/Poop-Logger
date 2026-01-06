@@ -76,7 +76,9 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     api.on("select", handleSelect);
 
     return () => {
-      api.off("select", handleSelect);
+      if (api) {
+        api.off("select", handleSelect);
+      }
     };
   }, [api]);
 
@@ -745,6 +747,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       </div>
 
       {/* Tap zones for navigation in full-screen (outside screenshot area) */}
+      {/* Top offset (top-16) prevents overlap with floating controls (share button and year selector) */}
       {isFullScreen && (
         <>
           <div
@@ -962,7 +965,7 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
                       type="button"
                       role="tab"
                       aria-current={isActive ? "true" : undefined}
-                      aria-label={`Slide ${index + 1} of ${count}${isActive ? ", current slide" : ""}`}
+                      aria-label={isActive ? `Slide ${index + 1} of ${count} (current)` : `Go to slide ${index + 1} of ${count}`}
                       onClick={() => api?.scrollTo(index)}
                       className={`h-2 sm:h-2.5 rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${
                         isActive ? "bg-white w-6 sm:w-8" : "bg-white/40 w-2 sm:w-2.5"
