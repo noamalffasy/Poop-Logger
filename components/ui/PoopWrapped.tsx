@@ -222,8 +222,8 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     const mostPoopsDateEntries = Object.entries(mostPoopsDate);
     const mostPoopsDateEntry = mostPoopsDateEntries.length > 0 
       ? mostPoopsDateEntries.reduce((a, b) => b[1] > a[1] ? b : a)
-      : ['N/A', 0];
-    const mostPoopsDateCount = mostPoopsDateEntry[1];
+      : ['N/A', 0] as [string, number];
+    const mostPoopsDateCount = mostPoopsDateEntry[1] as number;
 
     // Most poops in a month
     const mostPoopsMonth = yearData.reduce((acc, entry) => {
@@ -237,8 +237,8 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     const mostPoopsMonthEntries = Object.entries(mostPoopsMonth);
     const mostPoopsMonthEntry = mostPoopsMonthEntries.length > 0
       ? mostPoopsMonthEntries.reduce((a, b) => b[1] > a[1] ? b : a)
-      : ['N/A', 0];
-    const mostPoopsMonthCount = mostPoopsMonthEntry[1];
+      : ['N/A', 0] as [string, number];
+    const mostPoopsMonthCount = mostPoopsMonthEntry[1] as number;
 
     // Average per day based on actual data span
     const yearDates = yearData.map(entry => {
@@ -260,9 +260,9 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     const busiestHourEntries = Object.entries(hourCounts);
     const busiestHourEntry = busiestHourEntries.length > 0
       ? busiestHourEntries.reduce((a, b) => b[1] > a[1] ? b : a)
-      : ['0', 0];
-    const busiestHour = parseInt(busiestHourEntry[0]);
-    const busiestHourCount = busiestHourEntry[1];
+      : ['0', 0] as [string, number];
+    const busiestHour = parseInt(busiestHourEntry[0] as string);
+    const busiestHourCount = busiestHourEntry[1] as number;
     const busiestHourFormatted = busiestHour === 0 ? "12 AM" : 
       busiestHour === 12 ? "12 PM" :
       busiestHour < 12 ? `${busiestHour} AM` : `${busiestHour - 12} PM`;
@@ -302,8 +302,8 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     const favoriteWeekdayEntries = Object.entries(weekdayCounts);
     const favoriteWeekdayEntry = favoriteWeekdayEntries.length > 0
       ? favoriteWeekdayEntries.reduce((a, b) => b[1] > a[1] ? b : a)
-      : ['N/A', 0];
-    const favoriteWeekdayCount = favoriteWeekdayEntry[1];
+      : ['N/A', 0] as [string, number];
+    const favoriteWeekdayCount = favoriteWeekdayEntry[1] as number;
 
     return {
       totalPoops,
@@ -473,36 +473,23 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
     });
   }, [selectedYear, stats]);
 
-  // If there's no data for the selected year, show a message
-  if (!stats) {
-    return (
-      <Card className="shadow-lg w-full max-w-xs mx-auto">
-        <CardHeader className="flex flex-row items-center justify-between pb-3">
-          <CardTitle className="text-lg">A Year in Rearview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-center text-muted-foreground">
-            No data available for {selectedYear} yet. Start logging to see your stats!
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Destructure stats for easier access
-  const { 
-    totalPoops,
-    mostPoopsDateEntry,
-    mostPoopsMonthEntry,
-    avgPerDay,
-    busiestHourFormatted,
-    busiestHourCount,
-    longestStreak,
-    favoriteWeekdayEntry
-  } = stats;
-
   // Memoize slides array to avoid recalculation on every render
-  const slides = useMemo(() => [
+  // Must be before early return to comply with React Hooks rules
+  const slides = useMemo(() => {
+    if (!stats) return [];
+    
+    const { 
+      totalPoops,
+      mostPoopsDateEntry,
+      mostPoopsMonthEntry,
+      avgPerDay,
+      busiestHourFormatted,
+      busiestHourCount,
+      longestStreak,
+      favoriteWeekdayEntry
+    } = stats;
+    
+    return [
     {
       pretext: "Brace yourself...",
       title: `${selectedYear} Wrapped`,
@@ -596,7 +583,24 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
       gradient: "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600",
       isSummary: true,
     },
-  ], [stats, snarkyComments, selectedYear]);
+  ];
+  }, [stats, snarkyComments, selectedYear]);
+
+  // If there's no data for the selected year, show a message
+  if (!stats) {
+    return (
+      <Card className="shadow-lg w-full max-w-xs mx-auto">
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <CardTitle className="text-lg">A Year in Rearview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center text-muted-foreground">
+            No data available for {selectedYear} yet. Start logging to see your stats!
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const renderSlide = (slide: typeof slides[0] & { isSummary?: boolean }, index: number, isFullScreen: boolean) => (
     <CarouselItem
@@ -698,31 +702,31 @@ const PoopWrapped: React.FC<PoopWrappedProps> = ({ data }) => {
             >
               <div className="flex justify-between border-b border-white/20 pb-2">
                 <span className="opacity-70">Total Poops:</span>
-                <span className="font-bold">{totalPoops}</span>
+                <span className="font-bold">{stats?.totalPoops}</span>
               </div>
               <div className="flex justify-between border-b border-white/20 pb-2">
                 <span className="opacity-70">Average per Day:</span>
-                <span className="font-bold">{avgPerDay}</span>
+                <span className="font-bold">{stats?.avgPerDay}</span>
               </div>
               <div className="flex justify-between border-b border-white/20 pb-2">
                 <span className="opacity-70">Record Day:</span>
-                <span className="font-bold">{mostPoopsDateEntry[0]}</span>
+                <span className="font-bold">{stats?.mostPoopsDateEntry[0]}</span>
               </div>
               <div className="flex justify-between border-b border-white/20 pb-2">
                 <span className="opacity-70">Peak Month:</span>
-                <span className="font-bold">{mostPoopsMonthEntry[0]}</span>
+                <span className="font-bold">{stats?.mostPoopsMonthEntry[0]}</span>
               </div>
               <div className="flex justify-between border-b border-white/20 pb-2">
                 <span className="opacity-70">Busiest Hour:</span>
-                <span className="font-bold">{busiestHourFormatted}</span>
+                <span className="font-bold">{stats?.busiestHourFormatted}</span>
               </div>
               <div className="flex justify-between border-b border-white/20 pb-2">
                 <span className="opacity-70">Longest Streak:</span>
-                <span className="font-bold">{longestStreak} days</span>
+                <span className="font-bold">{stats?.longestStreak} days</span>
               </div>
               <div className="flex justify-between border-b border-white/20 pb-2">
                 <span className="opacity-70">Favorite Day:</span>
-                <span className="font-bold">{favoriteWeekdayEntry[0]}</span>
+                <span className="font-bold">{stats?.favoriteWeekdayEntry[0]}</span>
               </div>
             </motion.div>
           )}
